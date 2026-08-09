@@ -365,6 +365,76 @@ async function sb(path,opts={}){
   const t=await r.text();return t?JSON.parse(t):null;
 }
 
+// Storage: 원본 엑셀 파일 업로드
+async function sbUpload(bucket,path,file){
+  const url=SB_URL+'/storage/v1/object/'+bucket+'/'+encodeURIComponent(path);
+  const r=await fetch(url,{
+    method:'POST',
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'x-upsert':'true','Content-Type':file.type||'application/octet-stream'},
+    body:file
+  });
+  if(!r.ok)throw new Error(await r.text());
+  return SB_URL+'/storage/v1/object/public/'+bucket+'/'+encodeURIComponent(path);
+}
+
+// gzip 압축 (브라우저 내장 CompressionStream 사용, 없으면 원본)
+async function gzipEncode(str){
+  if(typeof CompressionStream==='undefined'){
+    // fallback: base64만
+    return 'RAW:'+btoa(unescape(encodeURIComponent(str)));
+  }
+  const enc=new TextEncoder().encode(str);
+  const cs=new CompressionStream('gzip');
+  const writer=cs.writable.getWriter();writer.write(enc);writer.close();
+  const compressed=await new Response(cs.readable).arrayBuffer();
+  // arrayBuffer → base64 (청크 단위로 안전하게)
+  const bytes=new Uint8Array(compressed);
+  let bin='';const chunk=8192;
+  for(let i=0;i<bytes.length;i+=chunk){bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+chunk));}
+  return 'GZ:'+btoa(bin);
+}
+async function gzipDecode(payload){
+  if(payload.startsWith('RAW:')){
+    return decodeURIComponent(escape(atob(payload.slice(4))));
+  }
+  const b64=payload.startsWith('GZ:')?payload.slice(3):payload;
+  const bin=atob(b64);
+  const bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  const ds=new DecompressionStream('gzip');
+  const writer=ds.writable.getWriter();writer.write(bytes);writer.close();
+  const out=await new Response(ds.readable).arrayBuffer();
+  return new TextDecoder().decode(out);
+}
+
+// 월별 업로드 데이터 저장 (파싱 데이터 압축)
+async function saveUpload(month,uploadType,fileName,data){
+  const gz=await gzipEncode(JSON.stringify(data));
+  await sb('sales_uploads?on_conflict=month,upload_type',{
+    method:'POST',prefer:'resolution=merge-duplicates',
+    body:{month,upload_type:uploadType,file_name:fileName,raw_data_gz:gz,uploaded_at:new Date().toISOString()}
+  });
+}
+// 월별 업로드 데이터 로드
+async function loadUploads(month){
+  const rows=await sb(`sales_uploads?month=eq.${encodeURIComponent(month)}&select=*`);
+  const result={first:null,second:null};
+  if(rows){
+    for(const r of rows){
+      const data=JSON.parse(await gzipDecode(r.raw_data_gz));
+      const obj={fileName:r.file_name,date:new Date(r.uploaded_at).toLocaleString('ko-KR'),data};
+      if(r.upload_type===1)result.first=obj;
+      else if(r.upload_type===2)result.second=obj;
+    }
+  }
+  return result;
+}
+// 월별 업로드 삭제 (특정 차수)
+async function deleteUpload(month,uploadType){
+  await sb(`sales_uploads?month=eq.${encodeURIComponent(month)}&upload_type=eq.${uploadType}`,{method:'DELETE'});
+}
+
+
 const DEFAULT_MANAGERS=[
   {raw_name:'김정대',display_name:'김정대 사장님',sort_order:0},
   {raw_name:'주정봉',display_name:'주정봉 부장',sort_order:1},
@@ -693,7 +763,7 @@ function onDrop(e,type,el){
 function processFile(type,file){
   showToast('처리 중...',5000);
   const reader=new FileReader();
-  reader.onload=e=>{
+  reader.onload=async e=>{
     try{
       const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
       const sheet=wb.Sheets[wb.SheetNames[0]];
@@ -721,10 +791,20 @@ function processFile(type,file){
         changeData=computeChanges();
         const mgrDiff=computeMgrDiffFromStats(stats1Cache,stats2);
         renderChangeCards(mgrDiff);
-        loadReasons();
+        await loadReasons();
+        renderChangeCards(mgrDiff);
         updateIsland('second');
       }
-      showToast(`${type}차 업로드 완료 (${data.length}건)`);
+      showToast(`${type}차 업로드 완료 (${data.length}건) · 저장 중...`,4000);
+      // Supabase 저장 (파싱 데이터 압축 + 원본 엑셀)
+      try{
+        await saveUpload(currentMonth,type,file.name,data);
+        await sbUpload('sales-files',`${currentMonth}_${type}차_${file.name}`,file);
+        showToast(`${type}차 저장 완료 ✓`);
+      }catch(saveErr){
+        console.warn('저장 실패:',saveErr);
+        showToast(`${type}차 처리됨 (저장 실패 - 로컬에서만 열었을 수 있어요)`,4000);
+      }
     }catch(err){showToast('오류: '+err.message);console.error(err);}
   };
   reader.readAsArrayBuffer(file);
@@ -767,8 +847,6 @@ function toggleChangeReport(type){
   document.getElementById('chcard-cost').classList.toggle('active',type==='cost');
   const report=document.getElementById('change-report');
   report.style.display='block';
-  const tabs=document.getElementById('cr-tabs');
-  tabs.style.display='none';
   if(type==='amt'){
     document.getElementById('cr-title').textContent='수주 변동 상세 (반품·취소·수량·금액)';
     renderEventReport();
@@ -926,12 +1004,61 @@ function initMonthSelect(){
   }
   currentMonth=sel.value;updateDial();
 }
-function onMonthChange(){currentMonth=document.getElementById('month-sel').value;updateDial();resetAll();}
+function onMonthChange(){currentMonth=document.getElementById('month-sel').value;updateDial();resetAll();restoreMonth();}
 function shiftMonth(dir){
   const sel=document.getElementById('month-sel');
   const idx=sel.selectedIndex+dir;
   if(idx<0||idx>=sel.options.length)return;
-  sel.selectedIndex=idx;currentMonth=sel.value;updateDial();resetAll();
+  sel.selectedIndex=idx;currentMonth=sel.value;updateDial();resetAll();restoreMonth();
+}
+
+// 저장된 월별 데이터 복원 (1차/2차 자동 로드 후 계산·렌더)
+async function restoreMonth(){
+  updateIslandStatus('불러오는 중...');
+  let uploads;
+  try{ uploads=await loadUploads(currentMonth); }
+  catch(e){ console.warn('월 데이터 로드 실패:',e); updateIslandReset(); return; }
+  if(!uploads.first&&!uploads.second){ updateIslandReset(); return; }
+
+  // 1차 복원
+  if(uploads.first){
+    state.first=uploads.first;
+    document.getElementById('uc1').className='ucard done-1';
+    document.getElementById('uc1-tag').innerHTML='✓ 1차 완료';
+    document.getElementById('uc1-name').textContent=uploads.first.fileName||'저장된 파일';
+    document.getElementById('uc1-date').textContent=uploads.first.date||'';
+    document.getElementById('uc2-name').textContent='2차 파일 업로드';
+    stats1Cache=process(uploads.first.data);
+    updateReportTitle('1차');
+    updateIsland('first');
+  }
+  // 2차 복원
+  if(uploads.second){
+    state.second=uploads.second;
+    document.getElementById('uc2').className='ucard done-2';
+    document.getElementById('uc2-tag').innerHTML='✓ 2차 완료';
+    document.getElementById('uc2-name').textContent=uploads.second.fileName||'저장된 파일';
+    document.getElementById('uc2-date').textContent=uploads.second.date||'';
+    const stats2=process(uploads.second.data);
+    updateReportTitle('2차');
+    if(state.first){
+      changeData=computeChanges();
+      const mgrDiff=computeMgrDiffFromStats(stats1Cache,stats2);
+      await loadReasons();
+      renderChangeCards(mgrDiff);
+      updateIsland('second');
+    }
+  }
+}
+function updateIslandStatus(txt){
+  const inner=document.getElementById('island-inner');
+  const[y,m]=currentMonth.split('-');
+  inner.innerHTML=`<div class="i-dot gray"></div><span class="i-month">${parseInt(m)}월 ${y}</span><span class="i-status">${txt}</span>`;
+}
+function updateIslandReset(){
+  const[y,m]=currentMonth.split('-');
+  document.getElementById('island').className='island compact';
+  document.getElementById('island-inner').innerHTML=`<div class="i-dot gray"></div><span class="i-month">${parseInt(m)}월 ${y}</span><span class="i-status">대기 중</span>`;
 }
 function updateDial(){
   const[y,m]=currentMonth.split('-');
@@ -987,7 +1114,7 @@ async function saveManagers(){
   }catch(e){showToast('저장 실패: '+e.message);}
 }
 
-(async()=>{initMonthSelect();await loadManagers();})();
+(async()=>{initMonthSelect();await loadManagers();await restoreMonth();})();
 </script>
 </body>
 </html>
