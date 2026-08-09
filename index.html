@@ -3,716 +3,811 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>드림셀 매출 연산기 v2</title>
+<title>드림셀 월매출 연산기</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
 <style>
-:root{--gold:#C9A22A;--gold-hi:#E8C040;--gold-dim:rgba(201,162,42,.12);--bg:#E3E7F0;--card:#FFFFFF;--border:#DDE3EE;--text:#16202E;--t2:#485870;--t3:#8B9AAE;--ok:#065F46;--err:#B91C1C;--r:12px;--sh:0 2px 14px rgba(0,0,0,.07);}
+/* ===== RESET & BASE ===== */
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Pretendard',-apple-system,'Malgun Gothic',sans-serif;font-size:13px;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;}
+body{font-family:'Malgun Gothic',-apple-system,sans-serif;font-size:13px;background:#F0F2F7;color:#16202E;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 
-/* SIDEBAR */
-.sb{width:220px;min-width:220px;background:#0B0B0B;display:flex;flex-direction:column;overflow:hidden;}
-.sb-top{padding:24px 18px 16px;border-bottom:1px solid rgba(255,255,255,.05);}
-.sb-brand{font-size:11px;font-weight:800;letter-spacing:.2em;color:rgba(201,162,42,.5);margin-bottom:6px;}
-.sb-title{font-size:26px;font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1;}
-.sb-sub{font-size:11px;color:var(--gold);margin-top:8px;font-weight:600;}
-.sb-hist{flex:1;overflow-y:auto;padding:12px 0;}
-.sb-hist-title{font-size:9px;font-weight:700;letter-spacing:.15em;color:rgba(255,255,255,.2);padding:10px 18px 6px;}
-.hi{padding:10px 18px;cursor:pointer;border-left:2px solid transparent;transition:all .12s;}
-.hi:hover{background:var(--gold-dim);}
-.hi.on{background:rgba(201,162,42,.13);border-left-color:var(--gold);}
-.hi-month{font-size:13px;font-weight:700;color:rgba(255,255,255,.85);}
-.hi.on .hi-month{color:var(--gold-hi);}
-.hi-badges{display:flex;gap:4px;margin-top:4px;}
-.hi-badge{font-size:10px;padding:1px 6px;border-radius:8px;font-weight:600;}
-.hi-badge.first{background:rgba(33,150,243,.2);color:#64B5F6;}
-.hi-badge.second{background:rgba(76,175,80,.2);color:#81C784;}
-.hi-badge.diff{background:rgba(233,30,99,.2);color:#F48FB1;}
+/* ===== TOP HEADER ===== */
+.top-hdr{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:48px;background:#fff;border-bottom:1px solid #DDE3EE;flex-shrink:0;z-index:10;}
+.top-brand{font-size:10px;font-weight:700;letter-spacing:.18em;color:#8B9AAE;}
+.top-title{font-size:15px;font-weight:700;color:#16202E;margin-left:10px;}
+.top-left{display:flex;align-items:center;gap:6px;}
+.top-right{display:flex;align-items:center;gap:8px;}
+.hbtn{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s;}
+.hbtn:hover{opacity:.85;}
+.hbtn-outline{background:#fff;border:1.5px solid #DDE3EE;color:#485870;}
+.hbtn-gold{background:#C9A22A;border:none;color:#fff;}
+.hbtn-blue{background:#2563EB;border:none;color:#fff;}
+.hbtn-gray{background:#6B7280;border:none;color:#fff;}
 
-/* MAIN */
+/* ===== BODY LAYOUT ===== */
+.body-wrap{display:flex;flex:1;overflow:hidden;}
+
+/* ===== SIDEBAR ===== */
+.sb{width:210px;min-width:210px;background:#0D0D0D;display:flex;flex-direction:column;overflow:hidden;}
+.sb-logo{padding:20px 18px 14px;border-bottom:1px solid rgba(255,255,255,.05);}
+.sb-logo-brand{font-size:9px;font-weight:800;letter-spacing:.2em;color:rgba(201,162,42,.45);}
+.sb-logo-title{font-size:22px;font-weight:900;color:#fff;letter-spacing:-.02em;line-height:1.1;margin-top:4px;}
+.sb-logo-sub{font-size:10px;color:#C9A22A;margin-top:6px;font-weight:600;}
+
+.sb-section{font-size:9px;font-weight:700;letter-spacing:.15em;color:rgba(255,255,255,.2);padding:14px 18px 6px;}
+.sb-hist{flex:1;overflow-y:auto;padding-bottom:8px;}
+.hi{padding:9px 18px;cursor:pointer;border-left:2px solid transparent;transition:all .12s;}
+.hi:hover{background:rgba(201,162,42,.07);}
+.hi.on{background:rgba(201,162,42,.12);border-left-color:#C9A22A;}
+.hi-month{font-size:13px;font-weight:700;color:rgba(255,255,255,.8);}
+.hi.on .hi-month{color:#E8C040;}
+.hi-badges{display:flex;gap:4px;margin-top:3px;}
+.hb{font-size:10px;padding:1px 7px;border-radius:10px;font-weight:600;}
+.hb.first{background:rgba(37,99,235,.2);color:#93C5FD;}
+.hb.second{background:rgba(16,185,129,.2);color:#6EE7B7;}
+.hb.none{background:rgba(255,255,255,.06);color:rgba(255,255,255,.3);}
+
+.sb-bottom{padding:10px 18px 14px;border-top:1px solid rgba(255,255,255,.05);}
+.sb-setting-btn{width:100%;padding:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:8px;color:rgba(255,255,255,.5);font-size:11px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;}
+.sb-setting-btn:hover{background:rgba(255,255,255,.1);color:#fff;}
+
+/* ===== MAIN AREA ===== */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
 
-/* HEADER */
-.hdr{background:#fff;padding:14px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;}
-.hdr-title{font-size:16px;font-weight:700;color:var(--text);}
-.month-select-wrap{display:flex;align-items:center;gap:8px;}
-.month-select-wrap label{font-size:12px;color:var(--t2);font-weight:600;}
-.month-sel{padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#F8F9FC;color:var(--text);cursor:pointer;}
-.btn{padding:7px 14px;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:12px;color:#fff;display:inline-flex;align-items:center;gap:5px;transition:opacity .15s;}
-.btn:hover{opacity:.85;}
-.btn-gold{background:var(--gold);}
-.btn-red{background:var(--err);}
-.btn-gray{background:#666;}
+/* ===== DIAL + UPLOAD ZONE ===== */
+.dial-zone{background:#fff;border-bottom:1px solid #DDE3EE;padding:18px 24px;flex-shrink:0;}
+.dial-row{display:flex;align-items:center;gap:32px;}
 
-/* UPLOAD AREA */
-.upload-row{display:flex;gap:12px;padding:16px 24px;flex-shrink:0;background:#F8F9FC;border-bottom:1px solid var(--border);}
-.upload-card{flex:1;background:#fff;border:1.5px dashed var(--border);border-radius:var(--r);padding:14px 16px;cursor:pointer;transition:all .15s;position:relative;}
-.upload-card:hover{border-color:var(--gold);background:rgba(201,162,42,.03);}
-.upload-card.drag-over{border-color:var(--gold);background:rgba(201,162,42,.08);transform:scale(1.01);box-shadow:0 0 0 3px rgba(201,162,42,.2);}
-.upload-card.loaded{border-style:solid;border-color:#4caf50;background:#F1F8F1;}
-.upload-card.loaded.second{border-color:#2196f3;background:#F0F7FF;}
-.uc-label{font-size:11px;font-weight:700;color:var(--t3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em;}
-.uc-name{font-size:13px;font-weight:700;color:var(--text);}
-.uc-date{font-size:11px;color:var(--t3);margin-top:2px;}
-.uc-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);}
+/* 다이얼 */
+.dial-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;}
+.dial{width:120px;height:120px;border-radius:50%;border:2px solid #DDE3EE;display:flex;align-items:center;justify-content:center;position:relative;cursor:default;}
+.dial-dot{position:absolute;width:7px;height:7px;background:#2563EB;border-radius:50%;top:7px;left:50%;transform:translateX(-50%);}
+.dial-ring{position:absolute;inset:8px;border-radius:50%;border:1px dashed #EEF0F5;pointer-events:none;}
+.dial-inner{text-align:center;}
+.dial-y{font-size:10px;color:#8B9AAE;}
+.dial-m{font-size:26px;font-weight:700;color:#16202E;line-height:1.1;}
+.dial-hint{font-size:9px;color:#8B9AAE;margin-top:2px;}
+.dial-arrows{display:flex;gap:6px;}
+.darr{width:26px;height:26px;border:1px solid #DDE3EE;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#485870;background:#fff;transition:all .12s;}
+.darr:hover{background:#EEF4FF;border-color:#2563EB;color:#2563EB;}
+.month-sel{padding:5px 8px;border:1px solid #DDE3EE;border-radius:8px;font-size:12px;background:#F8F9FC;color:#16202E;cursor:pointer;}
+
+/* 업로드 카드 */
+.upload-cards{display:flex;gap:12px;flex:1;}
+.ucard{flex:1;border:1.5px dashed #DDE3EE;border-radius:12px;padding:14px 16px;cursor:pointer;transition:all .15s;background:#FAFBFD;position:relative;}
+.ucard:hover{border-color:#2563EB;background:#EEF4FF;}
+.ucard.done-1{border-style:solid;border-color:#16A34A;background:#F0FDF4;}
+.ucard.done-2{border-style:solid;border-color:#2563EB;background:#EEF4FF;}
+.ucard.drag-over{border-color:#C9A22A;background:rgba(201,162,42,.06);transform:scale(1.01);}
+.uc-label{font-size:10px;font-weight:700;color:#8B9AAE;margin-bottom:4px;}
+.ucard.done-1 .uc-label{color:#15803D;}
+.ucard.done-2 .uc-label{color:#1D4ED8;}
+.uc-name{font-size:13px;font-weight:600;color:#16202E;}
+.uc-date{font-size:11px;color:#8B9AAE;margin-top:3px;}
 input[type=file]{display:none;}
 
-/* TABS */
-.tabs{display:flex;gap:0;padding:0 24px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0;}
-.tab{padding:12px 20px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--t3);border-bottom:2.5px solid transparent;transition:all .15s;}
-.tab.on{color:var(--gold);border-bottom-color:var(--gold);}
-.tab-actions{margin-left:auto;display:flex;align-items:center;gap:8px;padding:8px 0;}
-
-/* CONTENT */
-.content{flex:1;overflow-y:auto;padding:20px 24px;}
-
-/* CARDS */
-.kpi-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px;}
-.kpi-card{background:#fff;border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);}
-.kpi-lbl{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
-.kpi-val{font-size:22px;font-weight:900;letter-spacing:-.03em;color:var(--text);}
-.kpi-val.warn{color:var(--err);}
-.kpi-val.ok{color:var(--ok);}
-.section-title{font-size:14px;font-weight:700;color:var(--text);margin:20px 0 10px;display:flex;align-items:center;gap:6px;}
-.section-title::before{content:'';display:inline-block;width:4px;height:16px;background:var(--gold);border-radius:2px;}
-
-/* TABLE */
-.tbl-wrap{background:#fff;border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;margin-bottom:20px;}
-.tbl-scroll{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap;}
-th,td{padding:9px 10px;border-bottom:1px solid var(--border);text-align:center;}
-th{background:#F8F9FC;font-weight:700;color:var(--t2);font-size:11px;position:sticky;top:0;z-index:5;}
-td.num{text-align:right;font-variant-numeric:tabular-nums;}
-td.lft{text-align:left;}
-tr.sum-row td{background:#DEEBF7!important;font-weight:700;}
-tr.sub-row td{background:#E2EFDA!important;font-weight:700;}
-tr.brand-row td:first-child{background:#FFF2CC;font-weight:700;text-align:left;}
-tr:hover td{background:#FAFBFE;}
-tr.sum-row:hover td{background:#DEEBF7!important;}
-tr.cancelled td{background:#FFF0F0!important;}
-tr.changed td{background:#FFF8E1!important;}
-.diff-down{color:var(--err);font-weight:700;}
-.diff-up{color:var(--ok);font-weight:700;}
-
-/* COMPARE */
-.compare-summary{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
-.cmp-card{background:#fff;border-radius:var(--r);padding:16px 20px;box-shadow:var(--sh);}
-.cmp-card.cancel{border-left:4px solid var(--err);}
-.cmp-card.change{border-left:4px solid #FF9800;}
-.cmp-title{font-size:12px;font-weight:700;color:var(--t2);margin-bottom:6px;}
-.cmp-val{font-size:28px;font-weight:900;}
-.cmp-val.red{color:var(--err);}
-.cmp-val.orange{color:#E65100;}
-.cmp-sub{font-size:11px;color:var(--t3);margin-top:4px;}
-
-/* EMPTY */
-.empty{text-align:center;padding:60px;color:var(--t3);}
-.empty-icon{font-size:40px;margin-bottom:12px;}
-.empty-text{font-size:15px;font-weight:700;margin-bottom:6px;}
+/* ===== 결과 영역 ===== */
+.result-wrap{flex:1;overflow-y:auto;padding:20px 24px;}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#8B9AAE;text-align:center;gap:8px;}
+.empty-icon{font-size:40px;}
+.empty-text{font-size:15px;font-weight:600;}
 .empty-sub{font-size:12px;}
 
-/* TOAST */
-.toast{position:fixed;bottom:24px;right:24px;background:#333;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;}
-.toast.show{opacity:1;}
+/* ===== 결과 테이블 (원본 스타일 유지) ===== */
+.report-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.report-month{font-size:18px;font-weight:700;color:#16202E;}
+.report-badge{font-size:11px;padding:3px 10px;border-radius:20px;background:#EEF4FF;color:#1D4ED8;font-weight:600;margin-left:8px;}
 
-/* BADGE */
-.badge{padding:3px 8px;border-radius:10px;font-size:11px;font-weight:700;color:#fff;display:inline-block;}
-.badge.취소{background:var(--err);}
-.badge.금액변경{background:#E65100;}
-.badge.신규{background:var(--ok);}
+.section-title{font-weight:700;font-size:13px;margin-top:16px;margin-bottom:6px;color:#1E3A5F;border-left:4px solid #2563EB;padding-left:8px;}
+table{border-collapse:collapse;width:100%;min-width:1400px;border:1.5px solid #000;margin-bottom:12px;table-layout:fixed;}
+th,td{border:1px solid #999;padding:3px 4px;text-align:center;font-size:9.5px;word-break:break-all;overflow:hidden;}
+td:first-child,th:first-child{width:110px;min-width:110px;line-height:1.2;}
+.bg-header{background-color:#f2f2f2;font-weight:bold;}
+.bg-blue,.sum-row{background-color:#deebf7!important;font-weight:bold;}
+.bg-green,.subtotal-row{background-color:#e2efda!important;font-weight:bold;}
+.num-cell{text-align:right;white-space:nowrap;padding-right:4px!important;font-size:9px;}
+.brand-col{text-align:left;background-color:#fff2cc;font-weight:bold;}
+.text-blue{color:#0070c0;font-weight:bold;}
+.tbl-scroll{overflow-x:auto;margin-bottom:12px;}
+
+@media print{
+  @page{size:A3 landscape;margin:8mm;}
+  body{margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;display:block;height:auto;overflow:visible;}
+  .sb,.top-hdr,.dial-zone{display:none!important;}
+  .main{display:block!important;overflow:visible!important;}
+  .result-wrap{overflow:visible!important;padding:0!important;}
+  #page-1{page-break-after:always;}
+  table{min-width:100%!important;}
+  .num-cell{font-size:9pt!important;}
+  td,th{font-size:9pt;}
+}
+
+/* ===== 설정 모달 ===== */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;align-items:center;justify-content:center;}
+.modal-bg.on{display:flex;}
+.modal{background:#fff;border-radius:16px;width:520px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.15);}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #DDE3EE;}
+.modal-title{font-size:15px;font-weight:700;}
+.modal-close{font-size:20px;cursor:pointer;color:#8B9AAE;background:none;border:none;line-height:1;}
+.modal-close:hover{color:#16202E;}
+.modal-body{flex:1;overflow-y:auto;padding:20px 24px;}
+
+.mgr-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.mgr-item{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#F8F9FC;border-radius:8px;border:1px solid #DDE3EE;}
+.mgr-item-order{font-size:11px;color:#8B9AAE;width:20px;text-align:center;}
+.mgr-raw{font-size:12px;color:#485870;flex:1;}
+.mgr-display{font-size:13px;font-weight:600;color:#16202E;flex:1;}
+.mgr-del{padding:3px 10px;border:1px solid #FCA5A5;border-radius:6px;background:#FEF2F2;color:#DC2626;font-size:11px;cursor:pointer;font-weight:600;}
+.mgr-del:hover{background:#FEE2E2;}
+
+.add-form{display:flex;gap:8px;align-items:flex-end;padding:14px;background:#F0F7FF;border-radius:10px;border:1px solid #BFDBFE;}
+.add-form-col{display:flex;flex-direction:column;gap:4px;flex:1;}
+.add-form-label{font-size:10px;font-weight:700;color:#1D4ED8;}
+.add-input{padding:7px 10px;border:1px solid #BFDBFE;border-radius:8px;font-size:12px;background:#fff;color:#16202E;}
+.add-input:focus{outline:none;border-color:#2563EB;}
+.add-btn{padding:7px 18px;background:#2563EB;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.add-btn:hover{background:#1D4ED8;}
+.modal-save-row{padding:16px 24px;border-top:1px solid #DDE3EE;display:flex;justify-content:flex-end;gap:8px;}
+.modal-cancel{padding:8px 18px;border:1px solid #DDE3EE;border-radius:8px;background:#fff;color:#485870;font-size:13px;font-weight:600;cursor:pointer;}
+.modal-save{padding:8px 20px;background:#2563EB;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;}
+
+/* ===== 토스트 ===== */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1E293B;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transition:all .25s;z-index:999;pointer-events:none;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
-<aside class="sb">
-  <div class="sb-top">
-    <div class="sb-brand">DREAMCELL</div>
-    <div class="sb-title">매출<br>연산기</div>
-    <div class="sb-sub">개발: Lim Young Jae</div>
+<!-- TOP HEADER -->
+<div class="top-hdr">
+  <div class="top-left">
+    <span class="top-brand">DREAMCELL</span>
+    <span class="top-title">월매출 연산기</span>
   </div>
-  <div class="sb-hist">
-    <div class="sb-hist-title">MONTHLY HISTORY</div>
-    <div id="hist-list"></div>
+  <div class="top-right">
+    <button class="hbtn hbtn-gray" id="print-btn" onclick="window.print()" style="display:none;">🖨️ PDF 출력</button>
+    <button class="hbtn hbtn-gold" id="export-btn" onclick="exportToExcel()" style="display:none;">📥 엑셀 저장</button>
   </div>
-</aside>
-
-<!-- MAIN -->
-<div class="main">
-
-  <!-- HEADER -->
-  <div class="hdr">
-    <div class="hdr-title">📊 월 매출 자동 연산기</div>
-    <div class="month-select-wrap">
-      <label>대상 월</label>
-      <select class="month-sel" id="target-month"></select>
-      <button class="btn btn-gold" onclick="clearMonth()">🗑 이 달 초기화</button>
-    </div>
-  </div>
-
-  <!-- UPLOAD -->
-  <div class="upload-row">
-    <!-- 1차 -->
-    <div class="upload-card" id="uc1"
-      onclick="document.getElementById('f1').click()"
-      ondragover="onDragOver(event,this)"
-      ondragleave="onDragLeave(this)"
-      ondrop="onDrop(event,1,this)">
-      <div class="uc-label">1차 · 월초 업로드</div>
-      <div class="uc-name" id="uc1-name">엑셀 파일을 클릭하거나 드래그하여 업로드</div>
-      <div class="uc-date" id="uc1-date">맨 마지막 시트 데이터만 저장 후 업로드</div>
-      <div class="uc-btn"><span style="font-size:20px;">📂</span></div>
-    </div>
-    <input type="file" id="f1" accept=".xlsx,.xls" onchange="handleFile(1,this)">
-
-    <!-- 2차 -->
-    <div class="upload-card" id="uc2"
-      onclick="document.getElementById('f2').click()"
-      ondragover="onDragOver(event,this)"
-      ondragleave="onDragLeave(this)"
-      ondrop="onDrop(event,2,this)">
-      <div class="uc-label">2차 · 월말 업로드</div>
-      <div class="uc-name" id="uc2-name">1차 업로드 후 가능</div>
-      <div class="uc-date" id="uc2-date">1차와 자동 비교하여 취소/변경건 표시</div>
-      <div class="uc-btn"><span style="font-size:20px;">📂</span></div>
-    </div>
-    <input type="file" id="f2" accept=".xlsx,.xls" onchange="handleFile(2,this)">
-  </div>
-
-  <!-- TABS -->
-  <div class="tabs">
-    <button class="tab on" onclick="switchTab('report')">📊 매출 분석</button>
-    <button class="tab" onclick="switchTab('compare')">🔍 취소·변경건</button>
-    <div class="tab-actions">
-      <button class="btn btn-gray" onclick="exportExcel()">📥 엑셀 저장</button>
-      <button class="btn btn-red" onclick="window.print()">🖨 PDF 출력</button>
-    </div>
-  </div>
-
-  <!-- CONTENT -->
-  <div class="content" id="content">
-    <div class="empty">
-      <div class="empty-icon">📂</div>
-      <div class="empty-text">엑셀 파일을 업로드하면 매출 분석이 시작됩니다</div>
-      <div class="empty-sub">수주 데이터 엑셀의 마지막 시트를 별도 저장 후 업로드하세요</div>
-    </div>
-  </div>
-
 </div>
 
-<div id="toast" class="toast"></div>
+<div class="body-wrap">
+  <!-- SIDEBAR -->
+  <div class="sb">
+    <div class="sb-logo">
+      <div class="sb-logo-brand">MONTHLY SALES</div>
+      <div class="sb-logo-title">매출<br>연산기</div>
+      <div class="sb-logo-sub">v2 · by LYJ</div>
+    </div>
+    <div class="sb-section">히스토리</div>
+    <div class="sb-hist" id="hist-list">
+      <div style="padding:10px 18px;font-size:11px;color:rgba(255,255,255,.2);">기록 없음</div>
+    </div>
+    <div class="sb-bottom">
+      <button class="sb-setting-btn" onclick="openModal()">⚙️ 담당자 설정</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- 다이얼 + 업로드 존 -->
+    <div class="dial-zone">
+      <div class="dial-row">
+        <!-- 다이얼 -->
+        <div class="dial-wrap">
+          <div class="dial">
+            <div class="dial-dot"></div>
+            <div class="dial-ring"></div>
+            <div class="dial-inner">
+              <div class="dial-y" id="dial-year">2026</div>
+              <div class="dial-m" id="dial-month">8월</div>
+              <div class="dial-hint">분석 대상 월</div>
+            </div>
+          </div>
+          <div class="dial-arrows">
+            <div class="darr" onclick="shiftMonth(-1)">‹</div>
+            <select class="month-sel" id="month-sel" onchange="onMonthChange()"></select>
+            <div class="darr" onclick="shiftMonth(1)">›</div>
+          </div>
+        </div>
+
+        <!-- 업로드 카드 -->
+        <div class="upload-cards">
+          <div class="ucard" id="uc1"
+            onclick="document.getElementById('f1').click()"
+            ondragover="onDragOver(event,this)"
+            ondragleave="onDragLeave(this)"
+            ondrop="onDrop(event,1,this)">
+            <div class="uc-label">1차 · 월초 업로드</div>
+            <div class="uc-name" id="uc1-name">파일을 클릭하거나 드래그하여 업로드</div>
+            <div class="uc-date" id="uc1-date">수주 데이터 엑셀 파일 (.xlsx)</div>
+          </div>
+          <input type="file" id="f1" accept=".xlsx,.xls" onchange="handleFile(1,this)">
+
+          <div class="ucard" id="uc2"
+            onclick="if(uploadState.first) document.getElementById('f2').click(); else showToast('❌ 1차 파일을 먼저 업로드하세요')"
+            ondragover="onDragOver(event,this)"
+            ondragleave="onDragLeave(this)"
+            ondrop="onDrop(event,2,this)">
+            <div class="uc-label">2차 · 월말 업로드</div>
+            <div class="uc-name" id="uc2-name">1차 업로드 후 가능</div>
+            <div class="uc-date" id="uc2-date">1차와 자동 비교하여 차이 확인</div>
+          </div>
+          <input type="file" id="f2" accept=".xlsx,.xls" onchange="handleFile(2,this)">
+        </div>
+      </div>
+    </div>
+
+    <!-- 결과 영역 -->
+    <div class="result-wrap" id="result-wrap">
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">📂</div>
+        <div class="empty-text">엑셀 파일을 업로드하면 분석이 시작됩니다</div>
+        <div class="empty-sub">수주 데이터 첫 번째 시트를 업로드하세요</div>
+      </div>
+      <div id="report-area" style="display:none;">
+        <div id="page-1">
+          <div class="report-header">
+            <div>
+              <span class="report-month" id="report-month-title"></span>
+              <span class="report-badge" id="report-badge"></span>
+            </div>
+          </div>
+          <div class="section-title">1. 드림셀 전체 매출 (요약)</div>
+          <div class="tbl-scroll"><table id="summary-table">
+            <tr class="bg-header"><td>구분</td><td>총매출</td><td>매출<br>(-선발행)</td><td>선발행</td><td>총발주단가</td><td>이익</td><td>이익률</td></tr>
+            <tr id="total-summary" class="bg-blue">
+              <td style="text-align:center;">전체 합계</td><td class="num-cell"></td><td class="num-cell"></td><td class="num-cell"></td><td class="num-cell"></td><td class="num-cell"></td><td></td>
+            </tr>
+          </table></div>
+
+          <div class="section-title">2. 담당자별 매출 분석</div>
+          <div class="tbl-scroll"><table id="mgr-table">
+            <tr class="bg-header" id="mgr-header"><td>구분</td><td class="bg-blue">합 계</td></tr>
+            <tr id="mgr-sales"><td>매출</td><td class="bg-blue num-cell"></td></tr>
+            <tr id="mgr-pre"><td>선발행</td><td class="bg-blue num-cell"></td></tr>
+            <tr id="mgr-net" style="font-weight:bold;"><td>매출<br>(-선발행)</td><td class="bg-blue num-cell"></td></tr>
+            <tr id="mgr-cost"><td>발주단가</td><td class="bg-blue num-cell"></td></tr>
+            <tr id="mgr-profit" style="font-weight:bold;"><td>이익</td><td class="bg-blue num-cell"></td></tr>
+            <tr id="mgr-p-rate"><td>이익률</td><td class="bg-blue"></td></tr>
+          </table></div>
+
+          <div class="section-title">2-1. 담당자별 매출 분석 [ 인터넷구입 리베이트 제외 ]</div>
+          <div class="tbl-scroll"><table id="mgr-ex-table">
+            <tr class="bg-header" id="mgr-ex-header"><td>구분</td><td class="bg-blue">합 계</td></tr>
+            <tr id="mgr-ex-sales"><td>매출</td><td class="bg-blue num-cell"></td></tr>
+            <tr id="mgr-ex-ribe-sales"><td class="text-blue">인터넷,리베<br>매출</td><td class="bg-blue num-cell text-blue"></td></tr>
+            <tr id="mgr-ex-pre"><td>선발행</td><td class="bg-blue num-cell"></td></tr>
+            <tr id="mgr-ex-net" style="font-weight:bold;"><td>매출<br>(-선발행)</td><td class="bg-blue num-cell"></td></tr>
+            <tr id="mgr-ex-cost"><td>발주단가</td><td class="bg-blue num-cell"></td></tr>
+            <tr id="mgr-ex-ribe-cost"><td class="text-blue">인터넷,리베<br>발주단가</td><td class="bg-blue num-cell text-blue"></td></tr>
+            <tr id="mgr-ex-profit" style="font-weight:bold;"><td>이익</td><td class="bg-blue num-cell"></td></tr>
+            <tr id="mgr-ex-p-rate"><td>이익률</td><td class="bg-blue"></td></tr>
+            <tr id="mgr-ex-m-rate"><td>매출률</td><td class="bg-blue"></td></tr>
+            <tr id="mgr-ex-target"><td>타 겟</td><td class="bg-blue"></td></tr>
+          </table></div>
+        </div>
+
+        <div id="page-2">
+          <div class="section-title">3. 제조사별 상세 매출 분석</div>
+          <div class="tbl-scroll"><table id="brand-table">
+            <thead><tr id="line-header">
+              <td class="bg-green brand-col" style="text-align:center;">제조사 (Brand)</td>
+              <td class="bg-blue">합 계</td>
+            </tr></thead>
+            <tbody id="table-body"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 담당자 설정 모달 -->
+<div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <span class="modal-title">⚙️ 담당자 설정</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="mgr-list" class="mgr-list"></div>
+      <div class="add-form">
+        <div class="add-form-col">
+          <span class="add-form-label">엑셀 원본 이름</span>
+          <input class="add-input" id="inp-raw" placeholder="예: 홍길동">
+        </div>
+        <div class="add-form-col">
+          <span class="add-form-label">표시 이름</span>
+          <input class="add-input" id="inp-display" placeholder="예: 홍길동 대리">
+        </div>
+        <button class="add-btn" onclick="addManager()">추가</button>
+      </div>
+    </div>
+    <div class="modal-save-row">
+      <button class="modal-cancel" onclick="closeModal()">취소</button>
+      <button class="modal-save" onclick="saveManagers()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
 
 <script>
-// ===== 상수 =====
-const MANAGERS = ['김정대 사장님','주정봉 부장','장규연 과장','안상수 대리','박기덕 주임','오범석 차장','안현식 과장','이상원 대리','박기현 대리','지원호 부사장님','최규삼 부장','홍경완 차장','임태현 대리','전영배 대리','박찬희 대리','박찬호 대리','업자&대리점'];
-const managerMap = {'김정대':'김정대 사장님','주정봉':'주정봉 부장','장규연':'장규연 과장','안상수':'안상수 대리','박기덕':'박기덕 주임','오범석':'오범석 차장','안현식':'안현식 과장','이상원':'이상원 대리','박기현':'박기현 대리','지원호':'지원호 부사장님','최규삼':'최규삼 부장','홍경완':'홍경완 차장','임태현':'임태현 대리','전영배':'전영배 대리','박찬희':'박찬희 대리','박찬호':'박찬호 대리'};
-const TARGET_BRANDS = ['Merck','CORNING','BD BioCoat™','BIOWEST','Thermo Fisher Scientific','SIGMA','Beckman coulter','AXYGEN','INTEGRA','OXOID','BD DIFCO','BD FALCON','Acrobiosystems','reprocell (Stemgent,\nKoken, Reinnervate 포함)','invivogen','Excell bio','HemoCue America','RAININ','Neptune','EMS','BioLegend','ND','기타 국내외산 합계','기타 무역','-','Merck Group','BIOWEST (포천창고 포함)','CORNING (포천창고 포함)','Beckman coulter (재고사용 포함)','업자&대리점'];
+// ===== Supabase =====
+const SB_URL = 'https://fpqwdwmcjwcjvuwxkdop.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwcXdkd21jandjanZ1d3hrZG9wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyMzU3MTYsImV4cCI6MjEwMTgxMTcxNn0.RN5oUfgTwPh2-xdx5PaWOmveFBkYnwJJie28Wahujjk';
+
+async function sbFetch(path, opts={}){
+  const {method='GET',body,prefer}=opts;
+  const headers={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+  if(prefer) headers['Prefer']=prefer;
+  const res=await fetch(SB_URL+'/rest/v1/'+path,{method,headers,body:body?JSON.stringify(body):undefined});
+  if(!res.ok){const t=await res.text();throw new Error(t);}
+  const t=await res.text(); return t?JSON.parse(t):null;
+}
+
+// ===== 상수 (기본값, Supabase에서 덮어씀) =====
+const DEFAULT_MANAGERS = [
+  {raw_name:'김정대', display_name:'김정대 사장님', sort_order:0},
+  {raw_name:'주정봉', display_name:'주정봉 부장',   sort_order:1},
+  {raw_name:'장규연', display_name:'장규연 과장',   sort_order:2},
+  {raw_name:'안상수', display_name:'안상수 대리',   sort_order:3},
+  {raw_name:'박기덕', display_name:'박기덕 주임',   sort_order:4},
+  {raw_name:'오범석', display_name:'오범석 차장',   sort_order:5},
+  {raw_name:'안현식', display_name:'안현식 과장',   sort_order:6},
+  {raw_name:'이상원', display_name:'이상원 대리',   sort_order:7},
+  {raw_name:'박기현', display_name:'박기현 대리',   sort_order:8},
+  {raw_name:'지원호', display_name:'지원호 부사장님',sort_order:9},
+  {raw_name:'최규삼', display_name:'최규삼 부장',   sort_order:10},
+  {raw_name:'홍경완', display_name:'홍경완 차장',   sort_order:11},
+  {raw_name:'임태현', display_name:'임태현 대리',   sort_order:12},
+  {raw_name:'전영배', display_name:'전영배 대리',   sort_order:13},
+  {raw_name:'박찬희', display_name:'박찬희 대리',   sort_order:14},
+  {raw_name:'박찬호', display_name:'박찬호 대리',   sort_order:15},
+];
+
+const TARGET_BRANDS = ['Acrobiosystems','assaygenie','BIOWEST','Cusabio','Promocell','Alomone Labs','AVIVA System Biology ','CDI','cell guidance systems','cloud-clone','Excell bio','IPHASE Biosciences','Reliatech','IBSC','Muto','Prospec ','QEDbio ','reprocell (Stemgent,\nKoken, Reinnervate 포함)','St.John\u2019s Lab','Zytomed','Beckman coulter','CORNING','Merck','Neptune','Promega','Puredream','VoneTex','Zenoaq'];
 const EXCLUDE_LIST = ['이나연','이은정','서재란','반품','취소','악성재고','폐기','최춘원'];
 
+// ===== 동적 담당자 =====
+let MANAGERS = [];
+let managerMap = {};
+let tempManagers = []; // 모달 임시
+
+async function loadManagers(){
+  try{
+    const rows = await sbFetch('manager_settings?order=sort_order.asc');
+    if(rows && rows.length > 0){
+      applyManagers(rows);
+    } else {
+      // 최초 실행: 기본값 Supabase에 저장
+      await sbFetch('manager_settings', {
+        method:'POST',
+        prefer:'resolution=merge-duplicates',
+        body: DEFAULT_MANAGERS
+      });
+      applyManagers(DEFAULT_MANAGERS);
+    }
+  } catch(e){
+    console.warn('담당자 로드 실패, 기본값 사용:', e);
+    applyManagers(DEFAULT_MANAGERS);
+  }
+}
+
+function applyManagers(rows){
+  MANAGERS = rows.map(r=>r.display_name);
+  managerMap = {};
+  rows.forEach(r=>{ managerMap[r.raw_name]=r.display_name; });
+  // 업자&대리점은 항상 마지막
+  if(!MANAGERS.includes('업자&대리점')) MANAGERS.push('업자&대리점');
+}
 
 // ===== 상태 =====
-let currentTab = 'report';
 let currentMonth = '';
-let processedData = { first: null, second: null };
+let uploadState = {first:null, second:null};
 
 // ===== 유틸 =====
-function showToast(msg, d=2500){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),d); }
-function fmt(v){ if(!v||v===0) return ''; return Math.round(v).toLocaleString(); }
-function fmtRate(v){ if(!v) return ''; return (v*100).toFixed(1)+'%'; }
+function showToast(msg,d=2500){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),d);
+}
+
+// ===== 원본 로직: 파싱 =====
 function safeParse(val){
-    if(val===undefined||val===null||val==='') return 0;
-    if(typeof val==='number') return val;
-    let s=String(val), neg=s.includes('-')||(s.includes('(')&&s.includes(')'));
-    s=s.replace(/[^0-9.]/g,''); if(!s) return 0;
-    return neg ? -parseFloat(s) : parseFloat(s);
+  if(val===undefined||val===null||val==='') return 0;
+  if(typeof val==='number') return val;
+  let str=String(val);
+  let isNeg=str.includes('-')||(str.includes('(')&&str.includes(')'));
+  str=str.replace(/[^0-9.]/g,'');
+  if(str==='') return 0;
+  let num=parseFloat(str);
+  return isNeg?-num:num;
 }
 
-// ===== 월 선택 초기화 =====
-async function initMonthSelect(){
-    const sel = document.getElementById('target-month');
-    const now = new Date();
-    sel.innerHTML = '';
-    for(let i=0;i<12;i++){
-        const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
-        const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-        const opt = document.createElement('option');
-        opt.value = val;
-        opt.textContent = `${d.getFullYear()}년 ${d.getMonth()+1}월`;
-        sel.appendChild(opt);
+function format(v,isRate=false){
+  if(!v||v===0) return '';
+  if(isRate===true) return (v*100).toFixed(1)+'%';
+  if(isRate==='mRate') return (v*100).toFixed(2)+'%';
+  return Math.round(v).toLocaleString();
+}
+
+// ===== 원본 로직: process =====
+function process(data){
+  let matrix={}; let mStats={};
+  MANAGERS.forEach(m=>{
+    mStats[m]={sales:0,pre:0,cost:0,ribeSales:0,ribeCost:0};
+    TARGET_BRANDS.forEach(b=>{ if(!matrix[b])matrix[b]={}; matrix[b][m]=0; });
+  });
+  let total={sales:0,pre:0,cost:0,ribeSales:0,ribeCost:0};
+
+  data.forEach(row=>{
+    let amount=0,cost=0,qty=1,rowCostTotal=0;
+    let clientRaw='',managerRaw='',itemCodeRaw='',bRawRaw='',categoryRaw='';
+
+    for(let key in row){
+      let ck=key.replace(/\s+/g,'');
+      if(ck==='수주합계'||ck==='수주금액'||ck==='매출액') amount=safeParse(row[key]);
+      if(ck==='발주단가'||ck==='단가') cost=safeParse(row[key]);
+      if(ck==='수주량'||ck==='수량'){let q=safeParse(row[key]);if(q!==0)qty=q;}
+      if(ck==='총발주단가'||ck==='발주금액'||ck==='발주합계') rowCostTotal=safeParse(row[key]);
+      if(ck==='발주처'||ck==='거래처') clientRaw=String(row[key]||'').trim();
+      if(ck==='수주자'||ck==='담당자') managerRaw=String(row[key]||'').trim();
+      if(ck==='품명코드'||ck==='제품코드') itemCodeRaw=String(row[key]||'').trim();
+      if(ck==='제조업체'||ck==='브랜드') bRawRaw=String(row[key]||'').trim();
+      if(ck==='품명분류'||ck==='분류') categoryRaw=String(row[key]||'').trim();
     }
-    currentMonth = sel.value;
-    sel.addEventListener('change', async ()=>{ currentMonth=sel.value; await loadMonthData(); });
-    await loadMonthData();
+
+    if(rowCostTotal===0&&cost!==0) rowCostTotal=cost*qty;
+    if(EXCLUDE_LIST.some(k=>managerRaw.includes(k))) return;
+
+    let mName='';
+    for(let key in managerMap){ if(managerRaw.includes(key)){mName=managerMap[key];break;} }
+    if(!mName&&(managerRaw.includes('업자')||managerRaw.includes('대리점'))) mName='업자&대리점';
+
+    total.sales+=amount; total.cost+=rowCostTotal;
+    if(categoryRaw==='기타사입품'){total.ribeSales+=amount;total.ribeCost+=rowCostTotal;}
+    if(itemCodeRaw.includes('선발행')) total.pre+=amount;
+
+    if(mName&&mStats[mName]){
+      mStats[mName].sales+=amount; mStats[mName].cost+=rowCostTotal;
+      if(categoryRaw==='기타사입품'){mStats[mName].ribeSales+=amount;mStats[mName].ribeCost+=rowCostTotal;}
+      if(itemCodeRaw.includes('선발행')) mStats[mName].pre+=amount;
+
+      let brand='';
+      if(bRawRaw==='Merck Group') brand='Merck';
+      else if(bRawRaw==='Excell bio') brand='Excell bio';
+      else if(bRawRaw==='Biotix') brand='Neptune';
+      else if(['stemgent','koken','reinnervate','reprocell'].some(k=>bRawRaw.toLowerCase().includes(k))) brand='reprocell (Stemgent,\nKoken, Reinnervate 포함)';
+      else if(bRawRaw.toLowerCase().includes('corning')&&['재고사용','포천창고','corning'].some(x=>clientRaw.toLowerCase().includes(x))) brand='CORNING';
+      else if(bRawRaw.toLowerCase().includes('beckman')&&['드림셀인스','재고사용'].some(x=>clientRaw.toLowerCase().includes(x))) brand='Beckman coulter';
+      else{ for(let t of TARGET_BRANDS){if(t==='Merck')continue;if(t.trim().toLowerCase()===bRawRaw.toLowerCase()){brand=t;break;}} }
+      if(brand&&matrix[brand]) matrix[brand][mName]+=amount;
+    }
+  });
+
+  render(matrix,mStats,total);
 }
 
-// ===== Supabase =====
-const SUPABASE_URL = 'https://fpqwdwmcjwcjvuwxkdop.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwcXdkd21jandjanZ1d3hrZG9wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyMzU3MTYsImV4cCI6MjEwMTgxMTcxNn0.RN5oUfgTwPh2-xdx5PaWOmveFBkYnwJJie28Wahujjk';
+// ===== 원본 로직: render =====
+function render(matrix,mStats,total){
+  const tbody=document.getElementById('table-body');
+  const lineHeader=document.getElementById('line-header');
+  const rowIds=['mgr-sales','mgr-pre','mgr-net','mgr-cost','mgr-profit','mgr-p-rate','mgr-ex-sales','mgr-ex-ribe-sales','mgr-ex-pre','mgr-ex-net','mgr-ex-cost','mgr-ex-ribe-cost','mgr-ex-profit','mgr-ex-p-rate','mgr-ex-m-rate','mgr-ex-target'];
 
-async function supaFetch(path, options={}){
-    const { method='GET', body, prefer } = options;
-    const headers = {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
+  [lineHeader,document.getElementById('mgr-header'),document.getElementById('mgr-ex-header'),...rowIds].forEach(id=>{
+    const row=typeof id==='string'?document.getElementById(id):id;
+    while(row.cells.length>2) row.deleteCell(1);
+  });
+  tbody.innerHTML='';
+
+  const tNet=total.sales-total.pre;
+  const tProfit=tNet-total.cost;
+  const tCells=document.getElementById('total-summary').cells;
+  tCells[1].innerText=format(total.sales); tCells[2].innerText=format(tNet);
+  tCells[3].innerText=format(total.pre); tCells[4].innerText=format(total.cost);
+  tCells[5].innerText=format(tProfit); tCells[6].innerText=format(tNet?tProfit/tNet:0,true);
+
+  MANAGERS.forEach((m,idx)=>{
+    lineHeader.insertBefore(createCell(m,true),lineHeader.cells[lineHeader.cells.length-1]);
+    document.getElementById('mgr-header').insertBefore(createCell(m,true),document.getElementById('mgr-header').cells[idx+1]);
+    document.getElementById('mgr-ex-header').insertBefore(createCell(m,true),document.getElementById('mgr-ex-header').cells[idx+1]);
+
+    const s=mStats[m]||{sales:0,pre:0,cost:0,ribeSales:0,ribeCost:0};
+    const net=s.sales-s.pre; const profit=net-s.cost;
+    const exNet=net-s.ribeSales; const exProfit=profit-(s.ribeSales-s.ribeCost);
+
+    const ins=(rowId,val,cls)=>{
+      const el=document.getElementById(rowId);
+      el.insertBefore(createCell(val,false,cls||''),el.cells[idx+1]);
     };
-    if(prefer) headers['Prefer'] = prefer;
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-        method, headers,
-        body: body ? JSON.stringify(body) : undefined
+    ins('mgr-sales',format(s.sales));
+    ins('mgr-pre',format(s.pre));
+    ins('mgr-net',format(net));
+    ins('mgr-cost',format(s.cost));
+    ins('mgr-profit',format(profit));
+    ins('mgr-p-rate',format(net?profit/net:0,true));
+    ins('mgr-ex-sales',format(s.sales));
+    ins('mgr-ex-ribe-sales',format(s.ribeSales),'text-blue');
+    ins('mgr-ex-pre',format(s.pre));
+    ins('mgr-ex-net',format(exNet));
+    ins('mgr-ex-cost',format(s.cost));
+    ins('mgr-ex-ribe-cost',format(s.ribeCost),'text-blue');
+    ins('mgr-ex-profit',format(exProfit));
+    ins('mgr-ex-p-rate',format(exNet?exProfit/exNet:0,true));
+    ins('mgr-ex-m-rate',format(total.sales?s.sales/total.sales:0,'mRate'));
+    ins('mgr-ex-target','');
+  });
+
+  const lastIdx=MANAGERS.length+1;
+  const setLast=(id,v)=>{ document.getElementById(id).cells[lastIdx].innerText=v; };
+  setLast('mgr-sales',format(total.sales));
+  setLast('mgr-pre',format(total.pre));
+  setLast('mgr-net',format(tNet));
+  setLast('mgr-cost',format(total.cost));
+  setLast('mgr-profit',format(tProfit));
+  setLast('mgr-p-rate',format(tNet?tProfit/tNet:0,true));
+  setLast('mgr-ex-sales',format(total.sales));
+  setLast('mgr-ex-ribe-sales',format(total.ribeSales));
+  setLast('mgr-ex-pre',format(total.pre));
+  setLast('mgr-ex-net',format(tNet-total.ribeSales));
+  setLast('mgr-ex-cost',format(total.cost));
+  setLast('mgr-ex-ribe-cost',format(total.ribeCost));
+  setLast('mgr-ex-profit',format(tProfit-(total.ribeSales-total.ribeCost)));
+  setLast('mgr-ex-p-rate',format((tNet-total.ribeSales)?((tProfit-(total.ribeSales-total.ribeCost))/(tNet-total.ribeSales)):0,true));
+  setLast('mgr-ex-m-rate','100.00%');
+
+  let s1=Array(MANAGERS.length+1).fill(0);
+  let cs=Array(MANAGERS.length+1).fill(0);
+  let s2=Array(MANAGERS.length+1).fill(0);
+
+  TARGET_BRANDS.forEach((brand,idx)=>{
+    const tr=tbody.insertRow();
+    tr.insertCell(0).innerText=brand; tr.cells[0].className='brand-col';
+    let rSum=0;
+    MANAGERS.forEach((m,mIdx)=>{
+      const v=(matrix[brand]&&matrix[brand][m])||0;
+      tr.insertCell(-1).className='num-cell';
+      tr.cells[tr.cells.length-1].innerText=format(v);
+      rSum+=v;
+      if(idx<=4) s1[mIdx]+=v;
+      if(idx<=19) cs[mIdx]+=v;
+      if(idx>=20) s2[mIdx]+=v;
     });
-    if(!res.ok){ const t=await res.text(); throw new Error(t); }
-    const text = await res.text();
-    return text ? JSON.parse(text) : null;
+    tr.insertCell(-1).className='num-cell bg-blue';
+    tr.cells[tr.cells.length-1].innerText=format(rSum);
+    s1[MANAGERS.length]+=(idx<=4?rSum:0);
+    cs[MANAGERS.length]+=(idx<=19?rSum:0);
+    s2[MANAGERS.length]+=(idx>=20?rSum:0);
+    if(idx===4)  renderSubRow(tbody,s1,'소 계','bg-green subtotal-row');
+    if(idx===19) renderSubRow(tbody,cs,'합 계','bg-blue sum-row');
+    if(idx===27) renderSubRow(tbody,s2,'소 계','bg-green subtotal-row');
+  });
+
+  document.getElementById('empty-state').style.display='none';
+  document.getElementById('report-area').style.display='block';
+  document.getElementById('export-btn').style.display='inline-block';
+  document.getElementById('print-btn').style.display='inline-block';
 }
 
-async function saveToSupabase(month, type, summary, forCompare, fileName){
-    await supaFetch('sales_uploads?on_conflict=month,upload_type', {
-        method: 'POST',
-        prefer: 'resolution=merge-duplicates',
-        body: { month, upload_type:type, file_name:fileName, summary, for_compare:forCompare, uploaded_at:new Date().toISOString() }
-    });
+function createCell(text,isHeader=false,extraClass=''){
+  const td=document.createElement('td');
+  td.className=(isHeader?'bg-header ':'num-cell ')+extraClass;
+  td.innerHTML=text; return td;
 }
 
-async function loadMonthFromSupabase(month){
-    const data = await supaFetch(`sales_uploads?month=eq.${encodeURIComponent(month)}&select=*`);
-    return data || [];
+function renderSubRow(tbody,arr,label,cls){
+  const tr=tbody.insertRow(); tr.className=cls;
+  tr.insertCell(0).innerText=label; tr.cells[0].style.textAlign='center';
+  arr.forEach(v=>{ tr.insertCell(-1).className='num-cell'; tr.cells[tr.cells.length-1].innerText=format(v); });
 }
 
-async function loadAllMonthsFromSupabase(){
-    const data = await supaFetch('sales_uploads?select=month,upload_type,file_name,uploaded_at&order=month.desc');
-    return data || [];
+// ===== 원본 로직: exportToExcel =====
+function exportToExcel(){
+  const wb=XLSX.utils.table_to_book(document.getElementById('report-area'));
+  XLSX.writeFile(wb,`DREAMCELL_매출분석_${currentMonth}.xlsx`);
 }
 
-async function deleteMonthFromSupabase(month){
-    await supaFetch(`sales_uploads?month=eq.${encodeURIComponent(month)}`, { method:'DELETE' });
+// ===== 파일 업로드 =====
+function handleFile(type,input){
+  const file=input.files[0]; if(!file) return;
+  input.value='';
+  processFile(type,file);
+}
+function onDragOver(e,el){e.preventDefault();e.stopPropagation();el.classList.add('drag-over');}
+function onDragLeave(el){el.classList.remove('drag-over');}
+function onDrop(e,type,el){
+  e.preventDefault();e.stopPropagation();el.classList.remove('drag-over');
+  const file=e.dataTransfer.files[0];
+  if(!file) return;
+  if(!/\.(xlsx|xls)$/i.test(file.name)){showToast('❌ 엑셀 파일만 가능합니다');return;}
+  if(type===2&&!uploadState.first){showToast('❌ 1차 파일을 먼저 업로드하세요');return;}
+  processFile(type,file);
 }
 
-// ===== 데이터 로드/저장 =====
-async function loadMonthData(){
-    showLoadingContent();
+function processFile(type,file){
+  showToast('⏳ 처리 중...', 5000);
+  const reader=new FileReader();
+  reader.onload=e=>{
     try{
-        const rows = await loadMonthFromSupabase(currentMonth);
-        const first  = rows.find(r=>r.upload_type==='first');
-        const second = rows.find(r=>r.upload_type==='second');
-        processedData = {
-            first:  first  ? { summary:first.summary,  forCompare:first.for_compare,  fileName:first.file_name,  date:new Date(first.uploaded_at).toLocaleString('ko-KR')  } : null,
-            second: second ? { summary:second.summary, forCompare:second.for_compare, fileName:second.file_name, date:new Date(second.uploaded_at).toLocaleString('ko-KR') } : null,
-        };
-    }catch(e){ showToast('❌ 데이터 로드 실패: '+e.message); processedData={first:null,second:null}; }
-    updateUploadUI();
-    await renderHistList();
-    if(processedData.first) renderReport(processedData.first.summary);
-    else showEmpty();
-    if(processedData.first && processedData.second && currentTab==='compare') renderCompare();
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      const sheet=wb.Sheets[wb.SheetNames[0]];
+      const data=XLSX.utils.sheet_to_json(sheet);
+      const dateStr=new Date().toLocaleString('ko-KR');
+      if(type===1){
+        uploadState.first={fileName:file.name, date:dateStr, data};
+        document.getElementById('uc1').className='ucard done-1';
+        document.getElementById('uc1-name').textContent='✅ '+file.name;
+        document.getElementById('uc1-date').textContent='업로드: '+dateStr;
+        document.getElementById('uc2-name').textContent='2차 파일 업로드';
+        // 리포트 제목 업데이트
+        updateReportTitle('1차');
+        process(data);
+        addHistItem(currentMonth,'first');
+      } else {
+        uploadState.second={fileName:file.name, date:dateStr, data};
+        document.getElementById('uc2').className='ucard done-2';
+        document.getElementById('uc2-name').textContent='✅ '+file.name;
+        document.getElementById('uc2-date').textContent='업로드: '+dateStr;
+        updateReportTitle('2차');
+        process(data);
+        addHistItem(currentMonth,'second');
+      }
+      showToast(`✅ ${type}차 업로드 완료 (${data.length}건)`);
+    }catch(err){showToast('❌ 오류: '+err.message);console.error(err);}
+  };
+  reader.readAsArrayBuffer(file);
 }
 
-async function saveMonthData(type, data, fileName){
-    const summary    = aggregate(data);
-    const forCompare = data
-        .filter(r=>r.serialNo && r.serialNo!=='*' && r.serialNo!=='')
-        .map(r=>({ serialNo:r.serialNo, amount:r.amount, manager:r.manager, client:r.client, itemCode:r.itemCode }));
-    await saveToSupabase(currentMonth, type, summary, forCompare, fileName);
+function updateReportTitle(cycle){
+  const [y,m]=currentMonth.split('-');
+  document.getElementById('report-month-title').textContent=`${y}년 ${parseInt(m)}월 매출 분석`;
+  document.getElementById('report-badge').textContent=cycle+' 기준';
 }
 
-async function clearMonth(){
-    if(!confirm(`${currentMonth} 데이터를 초기화하겠습니까?`)) return;
-    try{
-        await deleteMonthFromSupabase(currentMonth);
-        processedData = { first:null, second:null };
-        updateUploadUI();
-        await renderHistList();
-        showEmpty();
-        showToast('🗑 초기화 완료');
-    }catch(e){ showToast('❌ 초기화 실패: '+e.message); }
+// ===== 월 선택 =====
+function initMonthSelect(){
+  const sel=document.getElementById('month-sel');
+  const now=new Date();
+  for(let i=0;i<12;i++){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const val=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const opt=document.createElement('option');
+    opt.value=val;
+    opt.textContent=`${d.getFullYear()}년 ${d.getMonth()+1}월`;
+    sel.appendChild(opt);
+  }
+  currentMonth=sel.value;
+  updateDial();
 }
 
-function showLoadingContent(){
-    document.getElementById('content').innerHTML=`<div class="empty"><div class="empty-icon" style="font-size:32px;">⏳</div><div class="empty-text">데이터 불러오는 중...</div></div>`;
+function onMonthChange(){
+  currentMonth=document.getElementById('month-sel').value;
+  updateDial();
+  resetUpload();
 }
 
-// ===== 드래그앤드롭 =====
-function onDragOver(e, el){ e.preventDefault(); e.stopPropagation(); el.classList.add('drag-over'); }
-function onDragLeave(el){ el.classList.remove('drag-over'); }
-function onDrop(e, type, el){
-    e.preventDefault(); e.stopPropagation(); el.classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if(!file) return;
-    if(!/\.(xlsx|xls)$/i.test(file.name)){ showToast('❌ 엑셀 파일(.xlsx, .xls)만 업로드 가능합니다'); return; }
-    processFile(type, file);
+function shiftMonth(dir){
+  const sel=document.getElementById('month-sel');
+  const idx=sel.selectedIndex+dir;
+  if(idx<0||idx>=sel.options.length) return;
+  sel.selectedIndex=idx;
+  currentMonth=sel.value;
+  updateDial();
+  resetUpload();
 }
 
-// ===== 업로드 UI =====
-function updateUploadUI(){
-    const first  = processedData.first;
-    const second = processedData.second;
-    const uc1 = document.getElementById('uc1');
-    const uc2 = document.getElementById('uc2');
+function updateDial(){
+  const [y,m]=currentMonth.split('-');
+  document.getElementById('dial-year').textContent=y;
+  document.getElementById('dial-month').textContent=parseInt(m)+'월';
+}
 
-    if(first){
-        uc1.classList.add('loaded'); uc1.classList.remove('second');
-        document.getElementById('uc1-name').textContent = `✅ ${first.fileName}`;
-        document.getElementById('uc1-date').textContent = `업로드: ${first.date}`;
-    } else {
-        uc1.classList.remove('loaded');
-        document.getElementById('uc1-name').textContent = '엑셀 파일을 클릭하거나 드래그하여 업로드';
-        document.getElementById('uc1-date').textContent = '맨 마지막 시트 데이터만 저장 후 업로드';
-    }
-
-    if(second){
-        uc2.classList.add('loaded','second');
-        document.getElementById('uc2-name').textContent = `✅ ${second.fileName}`;
-        document.getElementById('uc2-date').textContent = `업로드: ${second.date}`;
-    } else {
-        uc2.classList.remove('loaded','second');
-        document.getElementById('uc2-name').textContent = first ? '2차 파일 업로드' : '1차 업로드 후 가능';
-        document.getElementById('uc2-date').textContent = '1차와 자동 비교하여 취소/변경건 표시';
-    }
+function resetUpload(){
+  uploadState={first:null,second:null};
+  ['uc1','uc2'].forEach(id=>document.getElementById(id).className='ucard');
+  document.getElementById('uc1-name').textContent='파일을 클릭하거나 드래그하여 업로드';
+  document.getElementById('uc1-date').textContent='수주 데이터 엑셀 파일 (.xlsx)';
+  document.getElementById('uc2-name').textContent='1차 업로드 후 가능';
+  document.getElementById('uc2-date').textContent='1차와 자동 비교하여 차이 확인';
+  document.getElementById('empty-state').style.display='flex';
+  document.getElementById('report-area').style.display='none';
+  document.getElementById('export-btn').style.display='none';
+  document.getElementById('print-btn').style.display='none';
 }
 
 // ===== 히스토리 사이드바 =====
-async function renderHistList(){
-    const list = document.getElementById('hist-list');
-    try{
-        const rows = await loadAllMonthsFromSupabase();
-        if(!rows.length){ list.innerHTML='<div style="padding:10px 18px;font-size:11px;color:rgba(255,255,255,.2);">기록 없음</div>'; return; }
-
-        // 월별로 그룹핑
-        const monthMap = {};
-        rows.forEach(r=>{
-            if(!monthMap[r.month]) monthMap[r.month]={ first:false, second:false };
-            if(r.upload_type==='first')  monthMap[r.month].first=true;
-            if(r.upload_type==='second') monthMap[r.month].second=true;
-        });
-
-        const months = Object.keys(monthMap).sort().reverse();
-        list.innerHTML = months.map(m => {
-            const d = monthMap[m];
-            const badges = [];
-            if(d.first)  badges.push('<span class="hi-badge first">1차</span>');
-            if(d.second) badges.push('<span class="hi-badge second">2차</span>');
-            const [y,mo] = m.split('-');
-            return `<div class="hi ${m===currentMonth?'on':''}" onclick="selectMonth('${m}')">
-                <div class="hi-month">${y}년 ${parseInt(mo)}월</div>
-                <div class="hi-badges">${badges.join('')}</div>
-            </div>`;
-        }).join('');
-    }catch(e){ list.innerHTML='<div style="padding:10px 18px;font-size:11px;color:rgba(255,100,100,.5);">로드 실패</div>'; }
+const histMap={};
+function addHistItem(month,cycle){
+  if(!histMap[month]) histMap[month]={first:false,second:false};
+  histMap[month][cycle]=true;
+  renderHistList();
 }
 
-async function selectMonth(m){
-    document.getElementById('target-month').value = m;
-    currentMonth = m;
-    await loadMonthData();
-}
-
-// ===== 파일 처리 =====
-function handleFile(type, input){
-    const file = input.files[0]; if(!file) return;
-    input.value='';
-    processFile(type, file);
-}
-
-async function processFile(type, file){
-    if(type===2 && !processedData.first){ showToast('❌ 1차 파일을 먼저 업로드하세요'); return; }
-    showToast('⏳ 처리 중...', 5000);
-    const reader = new FileReader();
-    reader.onload = async e => {
-        try{
-            const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
-            const sheet = wb.Sheets[wb.SheetNames[wb.SheetNames.length-1]];
-            const raw = XLSX.utils.sheet_to_json(sheet);
-            const processed = processRaw(raw);
-            const summary = aggregate(processed);
-            const forCompare = processed
-                .filter(r=>r.serialNo&&r.serialNo!=='*'&&r.serialNo!=='')
-                .map(r=>({serialNo:r.serialNo,amount:r.amount,manager:r.manager,client:r.client,itemCode:r.itemCode}));
-            const uploadType = type===1 ? 'first' : 'second';
-
-            // Supabase 저장
-            await saveToSupabase(currentMonth, uploadType, summary, forCompare, file.name);
-
-            // 메모리 업데이트
-            const dateStr = new Date().toLocaleString('ko-KR');
-            if(type===1){
-                processedData.first = { summary, forCompare, fileName:file.name, date:dateStr };
-                renderReport(summary); switchTab('report');
-            } else {
-                processedData.second = { summary, forCompare, fileName:file.name, date:dateStr };
-                renderCompare(); switchTab('compare');
-            }
-
-            updateUploadUI();
-            await renderHistList();
-            showToast(`✅ ${type}차 업로드 완료 (${processed.length}건)`);
-        }catch(err){ showToast('❌ 오류: '+err.message); console.error(err); }
-    };
-    reader.readAsArrayBuffer(file);
-}
-
-// ===== 데이터 파싱 =====
-function processRaw(data){
-    const result = [];
-    data.forEach(row => {
-        let amount=0, cost=0, qty=1, rowCostTotal=0;
-        let client='', manager='', itemCode='', brand='', category='', serialNo='';
-
-        for(let key in row){
-            const k = key.replace(/\s+/g,'');
-            if(k==='수주합계'||k==='수주금액'||k==='매출액') amount=safeParse(row[key]);
-            if(k==='발주단가'||k==='단가') cost=safeParse(row[key]);
-            if(k==='수주량'||k==='수량'){ const q=safeParse(row[key]); if(q!==0) qty=q; }
-            if(k==='총발주단가'||k==='발주금액'||k==='발주합계') rowCostTotal=safeParse(row[key]);
-            if(k==='발주처'||k==='거래처') client=String(row[key]||'').trim();
-            if(k==='수주자'||k==='담당자') manager=String(row[key]||'').trim();
-            if(k==='품명코드'||k==='제품코드') itemCode=String(row[key]||'').trim();
-            if(k==='제조업체'||k==='브랜드') brand=String(row[key]||'').trim();
-            if(k==='품명분류'||k==='분류') category=String(row[key]||'').trim();
-            if(k==='전산No'||k==='전산no'||k==='전산번호') serialNo=String(row[key]||'').trim();
-        }
-
-        if(rowCostTotal===0 && cost!==0) rowCostTotal=cost*qty;
-        if(EXCLUDE_LIST.some(k=>manager.includes(k))) return;
-
-        let mName='';
-        for(let key in managerMap){ if(manager.includes(key)){ mName=managerMap[key]; break; } }
-        if(!mName&&(manager.includes('업자')||manager.includes('대리점'))) mName='업자&대리점';
-
-        result.push({ serialNo, manager:mName||manager, client, itemCode, brand, category, amount, cost:rowCostTotal, qty, isPre:itemCode.includes('선발행'), isRibe:category==='기타사입품' });
-    });
-    return result;
-}
-
-// ===== 집계 =====
-function aggregate(data){
-    let total={sales:0,pre:0,cost:0,ribeSales:0,ribeCost:0};
-    let mStats={};
-    let matrix={};
-    MANAGERS.forEach(m=>{ mStats[m]={sales:0,pre:0,cost:0,ribeSales:0,ribeCost:0}; });
-    TARGET_BRANDS.forEach(b=>{ matrix[b]={}; MANAGERS.forEach(m=>matrix[b][m]=0); });
-
-    data.forEach(r=>{
-        total.sales+=r.amount; total.cost+=r.cost;
-        if(r.isRibe){ total.ribeSales+=r.amount; total.ribeCost+=r.cost; }
-        if(r.isPre) total.pre+=r.amount;
-
-        const m=r.manager;
-        if(mStats[m]){
-            mStats[m].sales+=r.amount; mStats[m].cost+=r.cost;
-            if(r.isRibe){ mStats[m].ribeSales+=r.amount; mStats[m].ribeCost+=r.cost; }
-            if(r.isPre) mStats[m].pre+=r.amount;
-        }
-
-        if(!matrix[brand]) matrix[brand]={};
-        let bName='';
-        if(r.brand==='Merck Group') bName='Merck';
-        else if(r.brand==='Excell bio') bName='Excell bio';
-        else if(r.brand==='Biotix') bName='Neptune';
-        else for(let t of TARGET_BRANDS){ if(t==='Merck') continue; if(t.trim().toLowerCase()===r.brand.toLowerCase()){ bName=t; break; } }
-
-        if(bName && matrix[bName] && matrix[bName][m]!==undefined) matrix[bName][m]+=r.amount;
-    });
-
-    return { total, mStats, matrix };
-}
-
-// ===== 비교 =====
-function compareData(first, second){
-    const firstMap={}, secondMap={};
-    first.forEach(r=>{ if(r.serialNo && r.serialNo!=='*') firstMap[r.serialNo]=r; });
-    second.forEach(r=>{ if(r.serialNo && r.serialNo!=='*') secondMap[r.serialNo]=r; });
-
-    const cancelled=[], changed=[];
-    Object.keys(firstMap).forEach(sn=>{
-        if(!secondMap[sn]){ cancelled.push(firstMap[sn]); }
-        else if(Math.abs(secondMap[sn].amount - firstMap[sn].amount) > 1){
-            changed.push({ ...firstMap[sn], first_amount:firstMap[sn].amount, second_amount:secondMap[sn].amount, diff:secondMap[sn].amount-firstMap[sn].amount });
-        }
-    });
-    // 2차에 새로 생긴 건
-    const added=[];
-    Object.keys(secondMap).forEach(sn=>{ if(!firstMap[sn]) added.push(secondMap[sn]); });
-
-    return { cancelled, changed, added };
-}
-
-// ===== 탭 전환 =====
-function switchTab(tab){
-    currentTab=tab;
-    document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',['report','compare'][i]===tab));
-    if(tab==='report'){
-        if(processedData.first) renderReport(processedData.first);
-        else showEmpty();
-    } else {
-        if(processedData.first && processedData.second) renderCompare();
-        else if(!processedData.first) showEmpty('1차 파일을 먼저 업로드하세요','2차 파일도 업로드하면 자동 비교됩니다');
-        else showEmpty('2차 파일을 업로드하면 비교 결과가 표시됩니다','월말 수주 데이터를 업로드하세요');
-    }
-}
-
-function showEmpty(text='엑셀 파일을 업로드하면 분석이 시작됩니다', sub='수주 데이터의 마지막 시트를 별도 저장 후 업로드하세요'){
-    document.getElementById('content').innerHTML=`<div class="empty"><div class="empty-icon">📂</div><div class="empty-text">${text}</div><div class="empty-sub">${sub}</div></div>`;
-}
-
-// ===== 매출 분석 렌더링 =====
-function renderReport(summary){
-    const {total, mStats, matrix} = summary;
-    const tNet=total.sales-total.pre, tProfit=tNet-total.cost;
-    const pRate=tNet?tProfit/tNet:0;
-    // mStats 누락 방어
-    MANAGERS.forEach(m=>{ if(!mStats[m]) mStats[m]={sales:0,pre:0,cost:0,ribeSales:0,ribeCost:0}; });
-    const showMgrs=MANAGERS.filter(m=>mStats[m]&&mStats[m].sales>0);
-
-    let html=`
-    <div class="kpi-row">
-        <div class="kpi-card"><div class="kpi-lbl">총 매출</div><div class="kpi-val">${fmt(total.sales)}</div></div>
-        <div class="kpi-card"><div class="kpi-lbl">매출(-선발행)</div><div class="kpi-val">${fmt(tNet)}</div></div>
-        <div class="kpi-card"><div class="kpi-lbl">선발행</div><div class="kpi-val warn">${fmt(total.pre)}</div></div>
-        <div class="kpi-card"><div class="kpi-lbl">총 발주단가</div><div class="kpi-val">${fmt(total.cost)}</div></div>
-        <div class="kpi-card"><div class="kpi-lbl">이익</div><div class="kpi-val ok">${fmt(tProfit)}</div></div>
-        <div class="kpi-card"><div class="kpi-lbl">이익률</div><div class="kpi-val ok">${fmtRate(pRate)}</div></div>
-    </div>
-
-    <div class="section-title">담당자별 매출</div>
-    <div class="tbl-wrap"><div class="tbl-scroll"><table>
-        <thead><tr><th>구분</th>${showMgrs.map(m=>`<th>${m}</th>`).join('')}<th style="background:#DEEBF7">합 계</th></tr></thead>
-        <tbody>
-        ${[
-            {lbl:'매출',       key:'sales',   blue:false},
-            {lbl:'선발행',     key:'pre',     blue:false},
-            {lbl:'매출(-선발행)',key:'net',   blue:true},
-            {lbl:'발주단가',   key:'cost',    blue:false},
-            {lbl:'이익',       key:'profit',  blue:false},
-            {lbl:'이익률',     key:'pRate',   blue:false},
-        ].map(({lbl,key,blue})=>{
-            const vals=showMgrs.map(m=>{
-                const s=mStats[m];
-                const net=s.sales-s.pre, profit=net-s.cost;
-                const v={sales:s.sales,pre:s.pre,net,cost:s.cost,profit,pRate:net?profit/net:0}[key];
-                return key==='pRate'?fmtRate(v):fmt(v);
-            });
-            const tot=()=>{const net2=total.sales-total.pre,profit2=net2-total.cost;return{sales:total.sales,pre:total.pre,net:net2,cost:total.cost,profit:profit2,pRate:net2?profit2/net2:0}[key];};
-            const totVal=key==='pRate'?fmtRate(tot()):fmt(tot());
-            return `<tr${blue?' class="sum-row"':''}><td>${lbl}</td>${vals.map(v=>`<td class="num">${v}</td>`).join('')}<td class="num" style="background:#DEEBF7;font-weight:700;">${totVal}</td></tr>`;
-        }).join('')}
-        </tbody>
-    </table></div></div>
-
-    <div class="section-title">브랜드별 매출 매트릭스</div>
-    <div class="tbl-wrap"><div class="tbl-scroll"><table>
-        <thead><tr><th>브랜드</th>${showMgrs.map(m=>`<th>${m}</th>`).join('')}<th style="background:#DEEBF7">합 계</th></tr></thead>
-        <tbody id="brand-tbody"></tbody>
-    </table></div></div>`;
-
-    document.getElementById('content').innerHTML=html;
-
-    // 브랜드 테이블
-    const tbody=document.getElementById('brand-tbody');
-    let s1=Array(showMgrs.length+1).fill(0), cs=Array(showMgrs.length+1).fill(0), s2=Array(showMgrs.length+1).fill(0);
-    TARGET_BRANDS.forEach((brand,idx)=>{
-        const tr=document.createElement('tr');
-        tr.className='brand-row';
-        tr.innerHTML=`<td>${brand}</td>`;
-        let rSum=0;
-        showMgrs.forEach((m,mi)=>{
-            const v=matrix[brand]?.[m]||0;
-            tr.innerHTML+=`<td class="num">${fmt(v)}</td>`;
-            rSum+=v;
-            if(idx<=4) s1[mi]+=v; if(idx<=19) cs[mi]+=v; if(idx>=20) s2[mi]+=v;
-        });
-        tr.innerHTML+=`<td class="num" style="background:#DEEBF7;font-weight:700;">${fmt(rSum)}</td>`;
-        s1[showMgrs.length]+=(idx<=4?rSum:0); cs[showMgrs.length]+=(idx<=19?rSum:0); s2[showMgrs.length]+=(idx>=20?rSum:0);
-        tbody.appendChild(tr);
-        if(idx===4||idx===19||idx===27){
-            const sr=document.createElement('tr');
-            sr.className=idx===19?'sum-row':'sub-row';
-            const lbl=idx===19?'합 계':'소 계';
-            const arr=idx===19?cs:(idx===4?s1:s2);
-            sr.innerHTML=`<td style="text-align:center;">${lbl}</td>${arr.map(v=>`<td class="num">${fmt(v)}</td>`).join('')}`;
-            tbody.appendChild(sr);
-        }
-    });
-}
-
-// ===== 비교 렌더링 =====
-function renderCompare(){
-    const diff=compareData(processedData.first.forCompare, processedData.second.forCompare);
-    const {cancelled,changed,added}=diff;
-    const totalDiff=cancelled.reduce((s,r)=>s+r.amount,0);
-    const changedDiff=changed.reduce((s,r)=>s+r.diff,0);
-
-    let html=`
-    <div class="compare-summary">
-        <div class="cmp-card cancel">
-            <div class="cmp-title">취소건 (1차에 있고 2차에 없는 것)</div>
-            <div class="cmp-val red">${cancelled.length}건</div>
-            <div class="cmp-sub">매출 감소: -${fmt(totalDiff)}원</div>
-        </div>
-        <div class="cmp-card change">
-            <div class="cmp-title">금액 변경건</div>
-            <div class="cmp-val orange">${changed.length}건</div>
-            <div class="cmp-sub">차액 합계: ${changedDiff>=0?'+':''}${fmt(changedDiff)}원</div>
-        </div>
+function renderHistList(){
+  const list=document.getElementById('hist-list');
+  const months=Object.keys(histMap).sort().reverse();
+  if(!months.length){list.innerHTML='<div style="padding:10px 18px;font-size:11px;color:rgba(255,255,255,.2);">기록 없음</div>';return;}
+  list.innerHTML=months.map(m=>{
+    const d=histMap[m];
+    const [y,mo]=m.split('-');
+    const badges=(d.first?'<span class="hb first">1차</span>':'')+(d.second?'<span class="hb second">2차</span>':'<span class="hb none">2차 미완</span>');
+    return `<div class="hi ${m===currentMonth?'on':''}" onclick="selectMonth('${m}')">
+      <div class="hi-month">${y}년 ${parseInt(mo)}월</div>
+      <div class="hi-badges">${badges}</div>
     </div>`;
-
-    if(cancelled.length){
-        html+=`<div class="section-title">🔴 취소건 (${cancelled.length}건)</div>
-        <div class="tbl-wrap"><div class="tbl-scroll"><table>
-            <thead><tr><th>전산No</th><th>담당자</th><th>거래처</th><th>품명코드</th><th>매출</th><th>상태</th></tr></thead>
-            <tbody>${cancelled.map(r=>`<tr class="cancelled">
-                <td>${r.serialNo}</td><td>${r.manager}</td><td class="lft">${r.client}</td><td>${r.itemCode}</td>
-                <td class="num diff-down">-${fmt(r.amount)}</td>
-                <td><span class="badge 취소">취소</span></td>
-            </tr>`).join('')}</tbody>
-        </table></div></div>`;
-    }
-
-    if(changed.length){
-        html+=`<div class="section-title">🟠 금액 변경건 (${changed.length}건)</div>
-        <div class="tbl-wrap"><div class="tbl-scroll"><table>
-            <thead><tr><th>전산No</th><th>담당자</th><th>거래처</th><th>품명코드</th><th>1차 금액</th><th>2차 금액</th><th>차액</th><th>상태</th></tr></thead>
-            <tbody>${changed.map(r=>`<tr class="changed">
-                <td>${r.serialNo}</td><td>${r.manager}</td><td class="lft">${r.client}</td><td>${r.itemCode}</td>
-                <td class="num">${fmt(r.first_amount)}</td>
-                <td class="num">${fmt(r.second_amount)}</td>
-                <td class="num ${r.diff<0?'diff-down':'diff-up'}">${r.diff>=0?'+':''}${fmt(r.diff)}</td>
-                <td><span class="badge 금액변경">금액변경</span></td>
-            </tr>`).join('')}</tbody>
-        </table></div></div>`;
-    }
-
-    if(added.length){
-        html+=`<div class="section-title">🟢 신규 추가건 (${added.length}건)</div>
-        <div class="tbl-wrap"><div class="tbl-scroll"><table>
-            <thead><tr><th>전산No</th><th>담당자</th><th>거래처</th><th>품명코드</th><th>매출</th><th>상태</th></tr></thead>
-            <tbody>${added.map(r=>`<tr>
-                <td>${r.serialNo}</td><td>${r.manager}</td><td class="lft">${r.client}</td><td>${r.itemCode}</td>
-                <td class="num diff-up">+${fmt(r.amount)}</td>
-                <td><span class="badge 신규">신규</span></td>
-            </tr>`).join('')}</tbody>
-        </table></div></div>`;
-    }
-
-    if(!cancelled.length&&!changed.length&&!added.length){
-        html+=`<div class="empty"><div class="empty-icon">✅</div><div class="empty-text">1차와 2차 데이터가 동일합니다</div><div class="empty-sub">취소/변경건 없음</div></div>`;
-    }
-
-    document.getElementById('content').innerHTML=html;
+  }).join('');
 }
 
-// ===== 엑셀 내보내기 =====
-function exportExcel(){
-    const tables=document.querySelectorAll('table');
-    if(!tables.length){ showToast('❌ 데이터 없음'); return; }
-    const wb=XLSX.utils.book_new();
-    tables.forEach((t,i)=>XLSX.utils.book_append_sheet(wb,XLSX.utils.table_to_sheet(t),`Sheet${i+1}`));
-    XLSX.writeFile(wb,`DREAMCELL_매출분석_${currentMonth}.xlsx`);
-    showToast('📥 엑셀 저장 완료');
+function selectMonth(m){
+  document.getElementById('month-sel').value=m;
+  currentMonth=m;
+  updateDial();
+  resetUpload();
+}
+
+// ===== 담당자 설정 모달 =====
+function openModal(){
+  tempManagers=Object.entries(managerMap).map(([raw,display],i)=>({raw_name:raw,display_name:display,sort_order:i}));
+  renderMgrList();
+  document.getElementById('modal-bg').classList.add('on');
+}
+
+function closeModal(){
+  document.getElementById('modal-bg').classList.remove('on');
+  document.getElementById('inp-raw').value='';
+  document.getElementById('inp-display').value='';
+}
+
+function renderMgrList(){
+  const list=document.getElementById('mgr-list');
+  list.innerHTML=tempManagers.map((m,i)=>`
+    <div class="mgr-item">
+      <span class="mgr-item-order">${i+1}</span>
+      <span class="mgr-raw">${m.raw_name}</span>
+      <span class="mgr-display">${m.display_name}</span>
+      <button class="mgr-del" onclick="removeManager(${i})">삭제</button>
+    </div>`).join('');
+}
+
+function addManager(){
+  const raw=document.getElementById('inp-raw').value.trim();
+  const display=document.getElementById('inp-display').value.trim();
+  if(!raw||!display){showToast('❌ 두 항목 모두 입력해주세요');return;}
+  if(tempManagers.some(m=>m.raw_name===raw)){showToast('❌ 이미 존재하는 이름입니다');return;}
+  tempManagers.push({raw_name:raw,display_name:display,sort_order:tempManagers.length});
+  document.getElementById('inp-raw').value='';
+  document.getElementById('inp-display').value='';
+  renderMgrList();
+}
+
+function removeManager(idx){
+  tempManagers.splice(idx,1);
+  tempManagers.forEach((m,i)=>m.sort_order=i);
+  renderMgrList();
+}
+
+async function saveManagers(){
+  try{
+    showToast('⏳ 저장 중...', 3000);
+    // 기존 전체 삭제 후 재삽입
+    await sbFetch('manager_settings', {method:'DELETE'});
+    if(tempManagers.length>0){
+      await sbFetch('manager_settings',{method:'POST',prefer:'resolution=merge-duplicates',body:tempManagers});
+    }
+    applyManagers(tempManagers);
+    closeModal();
+    showToast('✅ 담당자 설정이 저장되었습니다');
+  }catch(e){
+    showToast('❌ 저장 실패: '+e.message);
+    console.error(e);
+  }
 }
 
 // ===== 초기화 =====
-(async()=>{ await initMonthSelect(); })();
+(async()=>{
+  initMonthSelect();
+  await loadManagers();
+})();
 </script>
 </body>
 </html>
