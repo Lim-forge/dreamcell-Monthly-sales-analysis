@@ -79,8 +79,16 @@ input[type=file]{display:none;}
 .cr-tabs{display:flex;gap:6px;}
 .cr-tab{padding:6px 14px;border:none;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;background:#E5E5EA;color:#8E8E93;}
 .cr-tab.on{background:#1C1C1E;color:#fff;}
-.cr-close{margin-left:auto;padding:6px 12px;border:none;border-radius:20px;background:#F2F2F7;color:#8E8E93;font-size:12px;font-weight:600;cursor:pointer;}
+.cr-close{padding:6px 12px;border:none;border-radius:20px;background:#F2F2F7;color:#8E8E93;font-size:12px;font-weight:600;cursor:pointer;}
 .cr-close:hover{background:#E5E5EA;}
+.cr-header-actions{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.cr-act-btn{padding:7px 14px;border:none;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;}
+.cr-act-btn.report{background:#E5E5EA;color:#1C1C1E;}
+.cr-act-btn.report:hover{background:#D1D1D6;}
+.cr-act-btn.save{background:#0A84FF;color:#fff;}
+.cr-act-btn.save:hover{background:#0071E3;}
+.cr-act-btn.save.saved{background:#30D158;}
+.cr-locked{background:#F9F9FB!important;color:#8E8E93!important;cursor:default;}
 .cr-body{padding:4px 0;overflow-x:auto;}
 .cr-table{width:100%;border-collapse:collapse;font-size:12px;min-width:640px;}
 .cr-table th{background:#F9F9FB;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#8E8E93;border-bottom:1px solid #E5E5EA;white-space:nowrap;}
@@ -97,10 +105,9 @@ input[type=file]{display:none;}
 .cr-up{color:#34C759;font-weight:700;}
 .cr-arrow-txt{color:#C7C7CC;margin:0 4px;}
 .cr-item-name{font-size:11px;color:#8E8E93;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.cr-reason-input{width:130px;padding:6px 9px;border:1px solid #E5E5EA;border-radius:8px;font-size:11px;background:#fff;color:#1C1C1E;}
+.cr-reason-input{width:160px;padding:6px 9px;border:1px solid #E5E5EA;border-radius:8px;font-size:11px;background:#fff;color:#1C1C1E;}
+.cr-reason-input.cr-locked{background:#F9F9FB;color:#8E8E93;border-color:#F2F2F7;}
 .cr-reason-input:focus{outline:none;border-color:#0A84FF;}
-.cr-reason-save{padding:6px 10px;background:#0A84FF;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;margin-left:4px;}
-.cr-reason-save.saved{background:#30D158;}
 .cr-empty{text-align:center;padding:36px;color:#8E8E93;}
 .cr-empty-icon{font-size:32px;margin-bottom:8px;}
 
@@ -248,7 +255,12 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
     <div class="change-report" id="change-report" style="display:none;">
       <div class="cr-header">
         <span class="cr-title" id="cr-title"></span>
-        <button class="cr-close" onclick="closeChangeReport()">닫기 ×</button>
+        <div class="cr-header-actions">
+          <button class="cr-act-btn report" onclick="exportChangeReport()">📄 보고서</button>
+          <button class="cr-act-btn report" id="cr-edit-btn" style="display:none;" onclick="enableReasonEdit()">✏️ 수정</button>
+          <button class="cr-act-btn save" id="cr-save-btn" onclick="saveAllReasons()">사유 일괄저장</button>
+          <button class="cr-close" onclick="closeChangeReport()">닫기 ×</button>
+        </div>
       </div>
       <div class="cr-body" id="cr-body"></div>
     </div>
@@ -866,13 +878,25 @@ function closeChangeReport(){
 function renderEventReport(){
   const body=document.getElementById('cr-body');
   const events=changeData.changeEvents;
-  if(!events.length&&!changeData.unmatched.length){body.innerHTML=emptyMsg('수주 변동 내역이 없습니다');return;}
+  if(!events.length&&!changeData.unmatched.length){body.innerHTML=emptyMsg('수주 변동 내역이 없습니다');document.getElementById('cr-save-btn').style.display='none';document.getElementById('cr-edit-btn').style.display='none';return;}
+  document.getElementById('cr-save-btn').style.display='inline-block';
   body.innerHTML=eventTableHtml(events);
+  applyReasonLockState();
 }
 function renderCostReport(){
   const body=document.getElementById('cr-body');
-  if(!changeData.costChange.length){body.innerHTML=emptyMsg('발주단가 변동 내역이 없습니다');return;}
+  if(!changeData.costChange.length){body.innerHTML=emptyMsg('발주단가 변동 내역이 없습니다');document.getElementById('cr-save-btn').style.display='none';document.getElementById('cr-edit-btn').style.display='none';return;}
+  document.getElementById('cr-save-btn').style.display='inline-block';
   body.innerHTML=costTableHtml(changeData.costChange);
+  applyReasonLockState();
+}
+// 저장된 사유가 하나라도 있으면 잠금 상태로 시작 (수정 버튼 노출)
+function applyReasonLockState(){
+  const inputs=document.querySelectorAll('#cr-body .reason-cell');
+  let hasSaved=false;
+  inputs.forEach(inp=>{ if((reasonMap[inp.dataset.key]||'').trim())hasSaved=true; });
+  if(hasSaved){lockReasonInputs(true);}
+  else{lockReasonInputs(false);}
 }
 function emptyMsg(t){return `<div class="cr-empty"><div class="cr-empty-icon">✅</div>${t}</div>`;}
 
@@ -894,21 +918,16 @@ function eventTableHtml(events){
       const diff=e.a2-e.a1;
       amtCell=`${fmtWon(e.a1)}<span class="cr-arrow-txt">→</span>${fmtWon(e.a2)} <span class="${diff<0?'cr-down':'cr-up'}">(${diff>=0?'+':''}${fmtWon(diff)})</span>`;
     }else amtCell='—';
-    // 반품 꼬리표 정보
-    let returnInfo='';
-    if(e.returns&&e.returns.length){
-      returnInfo=e.returns.map(rt=>`<div style="font-size:10px;color:#8E8E93;margin-top:3px;">${rt.type}행 ${rt.sn}: ${rt.qty}개${rt.ref?' · '+rt.ref:''}</div>`).join('');
-    }
     return `<tr>
       <td>${typeBadges(e.types)}</td>
       <td>${e.manager}</td>
       <td>${e.date}</td>
       <td>${e.sn}</td>
       <td>${e.itemCode}</td>
-      <td><div class="cr-item-name" title="${e.itemName}">${e.itemName}</div>${returnInfo}</td>
+      <td><div class="cr-item-name" title="${e.itemName}">${e.itemName}</div></td>
       <td class="right">${qtyCell}</td>
       <td class="right">${amtCell}</td>
-      <td class="right"><input class="cr-reason-input" id="reason-${rKey}" placeholder="사유" value="${saved}"><button class="cr-reason-save" onclick="saveReason('${rKey}','event','${e.sn}')">저장</button></td>
+      <td class="right"><input class="cr-reason-input reason-cell" data-key="${rKey}" data-type="event" data-sn="${e.sn}" placeholder="사유 입력" value="${saved}"></td>
     </tr>`;
   }).join('');
   // 매칭 실패한 반품행 (원본 미상)
@@ -922,15 +941,15 @@ function eventTableHtml(events){
         <td>${u.date}</td>
         <td>${u.sn}</td>
         <td>${u.itemCode}</td>
-        <td><div class="cr-item-name" title="${u.itemName}">${u.itemName}</div><div style="font-size:10px;color:#C77700;margin-top:3px;">⚠ 원본 매칭 실패 — 확인 필요${u.ref?' · '+u.ref:''}</div></td>
+        <td><div class="cr-item-name" title="${u.itemName}">${u.itemName}</div><div style="font-size:10px;color:#C77700;margin-top:3px;">⚠ 원본 매칭 실패 — 확인 필요</div></td>
         <td class="right">${u.qty}</td>
         <td class="right"><span class="cr-down">${fmtWon(u.amt)}</span></td>
-        <td class="right"><input class="cr-reason-input" id="reason-${rKey}" placeholder="사유" value="${saved}"><button class="cr-reason-save" onclick="saveReason('${rKey}','unmatched','${u.sn}')">저장</button></td>
+        <td class="right"><input class="cr-reason-input reason-cell" data-key="${rKey}" data-type="unmatched" data-sn="${u.sn}" placeholder="사유 입력" value="${saved}"></td>
       </tr>`;
     }).join('');
   }
   return `<table class="cr-table"><thead><tr>
-    <th>변동유형</th><th>담당자</th><th>수주일</th><th>전산No</th><th>품명코드</th><th>품명 / 반품내역</th><th class="right">수량</th><th class="right">수주금액</th><th class="right">사유</th>
+    <th>변동유형</th><th>담당자</th><th>수주일</th><th>전산No</th><th>품명코드</th><th>품명</th><th class="right">수량</th><th class="right">수주금액</th><th class="right">사유</th>
   </tr></thead><tbody>${rows}${unmatchedRows}</tbody></table>`;
 }
 
@@ -948,7 +967,7 @@ function costTableHtml(items){
       <td class="right">${r.qty}</td>
       <td class="right">${costCell}</td>
       <td class="right">${totalCell}</td>
-      <td class="right"><input class="cr-reason-input" id="reason-${rKey}" placeholder="사유" value="${saved}"><button class="cr-reason-save" onclick="saveReason('${rKey}','cost','${r.sn}')">저장</button></td>
+      <td class="right"><input class="cr-reason-input reason-cell" data-key="${rKey}" data-type="cost" data-sn="${r.sn}" placeholder="사유 입력" value="${saved}"></td>
     </tr>`;
   }).join('');
   return `<table class="cr-table"><thead><tr>
@@ -956,19 +975,84 @@ function costTableHtml(items){
   </tr></thead><tbody>${rows}</tbody></table>`;
 }
 
-async function saveReason(rKey,changeType,sn){
-  const input=document.getElementById('reason-'+rKey);
-  const reason=input.value.trim();
+// 사유 일괄 저장 (현재 열린 리포트의 모든 입력칸)
+async function saveAllReasons(){
+  const inputs=document.querySelectorAll('#cr-body .reason-cell');
+  if(!inputs.length){showToast('저장할 항목이 없습니다');return;}
+  const btn=document.getElementById('cr-save-btn');
+  btn.textContent='저장 중...';
   try{
-    await sb('change_reasons?on_conflict=month,serial_no,change_type',{
-      method:'POST',prefer:'resolution=merge-duplicates',
-      body:{month:currentMonth,serial_no:sn,change_type:changeType,reason,updated_at:new Date().toISOString()}
+    const payload=[];
+    inputs.forEach(inp=>{
+      const reason=inp.value.trim();
+      const sn=inp.dataset.sn,ct=inp.dataset.type,rKey=inp.dataset.key;
+      payload.push({month:currentMonth,serial_no:sn,change_type:ct,reason,updated_at:new Date().toISOString()});
+      reasonMap[rKey]=reason;
     });
-    reasonMap[rKey]=reason;
-    const btn=input.nextElementSibling;
-    btn.textContent='✓';btn.classList.add('saved');
-    setTimeout(()=>{btn.textContent='저장';btn.classList.remove('saved');},1500);
-  }catch(e){showToast('사유 저장 실패: '+e.message);}
+    await sb('change_reasons?on_conflict=month,serial_no,change_type',{
+      method:'POST',prefer:'resolution=merge-duplicates',body:payload
+    });
+    btn.textContent='✓ 저장됨';btn.classList.add('saved');
+    lockReasonInputs(true);
+    setTimeout(()=>{btn.textContent='사유 일괄저장';btn.classList.remove('saved');},2000);
+    showToast('사유가 저장되었습니다');
+  }catch(e){btn.textContent='사유 일괄저장';showToast('저장 실패: '+e.message);}
+}
+
+// 사유 입력칸 잠금/해제 (수정 버튼용)
+function lockReasonInputs(locked){
+  document.querySelectorAll('#cr-body .reason-cell').forEach(inp=>{
+    inp.readOnly=locked;
+    inp.classList.toggle('cr-locked',locked);
+  });
+  document.getElementById('cr-edit-btn').style.display=locked?'inline-block':'none';
+}
+function enableReasonEdit(){
+  lockReasonInputs(false);
+  showToast('사유를 수정할 수 있습니다');
+}
+
+// 현재 열린 변동 리포트를 엑셀 보고서로 내보내기
+function exportChangeReport(){
+  const[y,m]=currentMonth.split('-');
+  let aoa=[];
+  if(currentReportType==='amt'){
+    aoa.push([`${y}년 ${parseInt(m)}월 수주 변동 보고서`]);
+    aoa.push([]);
+    aoa.push(['변동유형','담당자','수주일','전산No','품명코드','품명','수량(전→후)','수주금액(전→후)','변동액','사유']);
+    changeData.changeEvents.forEach(e=>{
+      const rKey=`${e.sn}_event`;
+      const qty=e.q2!==null?`${e.q1} → ${e.q2}`:`${e.q1}`;
+      const amt=e.a2!==null?`${fmtWon(e.a1)} → ${fmtWon(e.a2)}`:'—';
+      const diff=e.a2!==null?(e.a2-e.a1):0;
+      aoa.push([e.types.join('·'),e.manager,e.date,e.sn,e.itemCode,e.itemName,qty,amt,diff,reasonMap[rKey]||'']);
+    });
+    changeData.unmatched.forEach(u=>{
+      const rKey=`${u.sn}_unmatched`;
+      aoa.push(['원본미상',u.type,u.date,u.sn,u.itemCode,u.itemName,u.qty,`-${fmtWon(u.amt)}`,-u.amt,reasonMap[rKey]||'']);
+    });
+    // 합계
+    const totalDiff=changeData.changeEvents.reduce((s,e)=>s+(e.a2!==null?e.a2-e.a1:0),0);
+    aoa.push([]);
+    aoa.push(['','','','','','','','매출 변동 합계',totalDiff,'']);
+  }else{
+    aoa.push([`${y}년 ${parseInt(m)}월 발주단가 변동 보고서 (개당 10만원↑)`]);
+    aoa.push([]);
+    aoa.push(['담당자','수주일','전산No','품명코드','품명','수량','개당단가(전→후)','총발주금액(전→후)','총액차이','사유']);
+    changeData.costChange.forEach(r=>{
+      const rKey=`${r.sn}_cost`;
+      aoa.push([r.manager,r.date,r.sn,r.itemCode,r.itemName,r.qty,`${fmtWon(r.first_cost)} → ${fmtWon(r.second_cost)}`,`${fmtWon(r.first_total)} → ${fmtWon(r.second_total)}`,r.total_diff,reasonMap[rKey]||'']);
+    });
+    const totalDiff=changeData.costChange.reduce((s,r)=>s+r.total_diff,0);
+    aoa.push([]);
+    aoa.push(['','','','','','','','총액 차이 합계',totalDiff,'']);
+  }
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  const wb=XLSX.utils.book_new();
+  const sheetName=currentReportType==='amt'?'수주변동':'발주단가변동';
+  XLSX.utils.book_append_sheet(wb,ws,sheetName);
+  XLSX.writeFile(wb,`DREAMCELL_${sheetName}_${currentMonth}.xlsx`);
+  showToast('보고서가 저장되었습니다');
 }
 async function loadReasons(){
   try{
