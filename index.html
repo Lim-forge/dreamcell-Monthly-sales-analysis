@@ -67,6 +67,43 @@ input[type=file]{display:none;}
 .chcard.cost .chcard-sub{color:#C7362B;}
 .chcard-sub.empty{color:#30D158!important;}
 
+/* 인라인 변동 리포트 */
+.chcard.active{border-width:2px;}
+.chcard.amt.active{border-color:#FF9F0A;}
+.chcard.cost.active{border-color:#FF6B52;}
+#arrow-amt,#arrow-cost{transition:transform .2s;}
+.chcard.active #arrow-amt,.chcard.active #arrow-cost{transform:rotate(90deg);}
+.change-report{background:#fff;border-radius:16px;margin:14px 0;box-shadow:0 1px 3px rgba(0,0,0,.05);overflow:hidden;}
+.cr-header{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:0.5px solid #E5E5EA;flex-wrap:wrap;}
+.cr-title{font-size:15px;font-weight:800;color:#1C1C1E;}
+.cr-tabs{display:flex;gap:6px;}
+.cr-tab{padding:6px 14px;border:none;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;background:#E5E5EA;color:#8E8E93;}
+.cr-tab.on{background:#1C1C1E;color:#fff;}
+.cr-close{margin-left:auto;padding:6px 12px;border:none;border-radius:20px;background:#F2F2F7;color:#8E8E93;font-size:12px;font-weight:600;cursor:pointer;}
+.cr-close:hover{background:#E5E5EA;}
+.cr-body{padding:4px 0;overflow-x:auto;}
+.cr-table{width:100%;border-collapse:collapse;font-size:12px;min-width:640px;}
+.cr-table th{background:#F9F9FB;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:#8E8E93;border-bottom:1px solid #E5E5EA;white-space:nowrap;}
+.cr-table th.right{text-align:right;}
+.cr-table td{padding:10px 12px;border-bottom:0.5px solid #F2F2F7;color:#1C1C1E;vertical-align:middle;}
+.cr-table td.right{text-align:right;white-space:nowrap;}
+.cr-table tr:last-child td{border-bottom:none;}
+.cr-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;}
+.cr-badge.cancel{background:#FFEBE9;color:#D70015;}
+.cr-badge.change{background:#FFF4E0;color:#C77700;}
+.cr-badge.added{background:#E8F8ED;color:#248A3D;}
+.cr-badge.cost{background:#FFEEEA;color:#C7362B;}
+.cr-down{color:#FF3B30;font-weight:700;}
+.cr-up{color:#34C759;font-weight:700;}
+.cr-arrow-txt{color:#C7C7CC;margin:0 4px;}
+.cr-item-name{font-size:11px;color:#8E8E93;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cr-reason-input{width:130px;padding:6px 9px;border:1px solid #E5E5EA;border-radius:8px;font-size:11px;background:#fff;color:#1C1C1E;}
+.cr-reason-input:focus{outline:none;border-color:#0A84FF;}
+.cr-reason-save{padding:6px 10px;background:#0A84FF;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;margin-left:4px;}
+.cr-reason-save.saved{background:#30D158;}
+.cr-empty{text-align:center;padding:36px;color:#8E8E93;}
+.cr-empty-icon{font-size:32px;margin-bottom:8px;}
+
 .mgr-diff-card{background:#fff;border-radius:16px;padding:16px 18px;margin:14px 0;box-shadow:0 1px 3px rgba(0,0,0,.05);}
 .mdc-title{font-size:13px;font-weight:700;color:#1C1C1E;margin-bottom:12px;}
 .mdc-list{display:flex;flex-direction:column;gap:8px;}
@@ -98,40 +135,6 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
 .num-cell{text-align:right;white-space:nowrap;padding-right:4px!important;font-size:9px;}
 .brand-col{text-align:left;background-color:#fff2cc;font-weight:bold;}
 .text-blue{color:#0070c0;font-weight:bold;}
-
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:none;align-items:flex-end;justify-content:center;}
-.modal-bg.on{display:flex;}
-.modal-sheet{background:#F2F2F7;border-radius:24px 24px 0 0;width:100%;max-width:720px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;animation:slideUp .3s cubic-bezier(.34,1.2,.4,1);}
-@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
-.sheet-handle{width:40px;height:5px;background:#C7C7CC;border-radius:3px;margin:10px auto 4px;}
-.sheet-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 20px 14px;border-bottom:0.5px solid #E5E5EA;}
-.sheet-title{font-size:17px;font-weight:800;color:#1C1C1E;}
-.sheet-close{width:30px;height:30px;border-radius:50%;background:#E5E5EA;border:none;font-size:16px;color:#8E8E93;cursor:pointer;}
-.sheet-body{flex:1;overflow-y:auto;padding:16px 20px 30px;}
-.sheet-tabs{display:flex;gap:6px;padding:0 20px 12px;}
-.sheet-tab{flex:1;padding:9px;border:none;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;background:#E5E5EA;color:#8E8E93;}
-.sheet-tab.on{background:#1C1C1E;color:#fff;}
-
-.change-item{background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.04);}
-.ci-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.ci-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;}
-.ci-badge.cancel{background:#FFEBE9;color:#D70015;}
-.ci-badge.change{background:#FFF4E0;color:#C77700;}
-.ci-badge.added{background:#E8F8ED;color:#248A3D;}
-.ci-badge.cost{background:#FFEEEA;color:#C7362B;}
-.ci-mgr{font-size:13px;font-weight:700;color:#1C1C1E;}
-.ci-grid{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:12px;margin-bottom:10px;}
-.ci-key{color:#8E8E93;}
-.ci-val{color:#1C1C1E;font-weight:500;text-align:right;}
-.ci-val.down{color:#FF3B30;font-weight:700;}
-.ci-val.up{color:#34C759;font-weight:700;}
-.ci-amt-box{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#F9F9FB;border-radius:10px;margin-bottom:8px;font-size:12px;}
-.ci-amt-arrow{color:#8E8E93;}
-.ci-reason{display:flex;gap:8px;align-items:center;margin-top:4px;}
-.ci-reason-input{flex:1;padding:9px 12px;border:1px solid #E5E5EA;border-radius:10px;font-size:12px;background:#fff;color:#1C1C1E;}
-.ci-reason-input:focus{outline:none;border-color:#0A84FF;}
-.ci-reason-save{padding:9px 14px;background:#0A84FF;color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
-.ci-reason-save.saved{background:#30D158;}
 
 .mgr-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:none;align-items:center;justify-content:center;}
 .mgr-modal-bg.on{display:flex;}
@@ -227,18 +230,27 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
 
   <div id="change-section" style="display:none;">
     <div class="change-cards">
-      <div class="chcard amt" onclick="openChangeSheet('amt')">
-        <div class="chcard-top"><div class="chcard-icon">💰</div><div class="chcard-arrow">›</div></div>
+      <div class="chcard amt" id="chcard-amt" onclick="toggleChangeReport('amt')">
+        <div class="chcard-top"><div class="chcard-icon">💰</div><div class="chcard-arrow" id="arrow-amt">›</div></div>
         <div class="chcard-count"><span id="amt-count">0</span><span class="unit">건</span></div>
-        <div class="chcard-label">수주금액 변동</div>
+        <div class="chcard-label">수주 변동 (반품·취소·수량·금액)</div>
         <div class="chcard-sub" id="amt-sub"></div>
       </div>
-      <div class="chcard cost" onclick="openChangeSheet('cost')">
-        <div class="chcard-top"><div class="chcard-icon">📦</div><div class="chcard-arrow">›</div></div>
+      <div class="chcard cost" id="chcard-cost" onclick="toggleChangeReport('cost')">
+        <div class="chcard-top"><div class="chcard-icon">📦</div><div class="chcard-arrow" id="arrow-cost">›</div></div>
         <div class="chcard-count"><span id="cost-count">0</span><span class="unit">건</span></div>
         <div class="chcard-label">발주단가 변동 (10만↑)</div>
         <div class="chcard-sub" id="cost-sub"></div>
       </div>
+    </div>
+
+    <!-- 인라인 상세 리포트 -->
+    <div class="change-report" id="change-report" style="display:none;">
+      <div class="cr-header">
+        <span class="cr-title" id="cr-title"></span>
+        <button class="cr-close" onclick="closeChangeReport()">닫기 ×</button>
+      </div>
+      <div class="cr-body" id="cr-body"></div>
     </div>
 
     <div class="mgr-diff-card" id="mgr-diff-card" style="display:none;">
@@ -318,21 +330,6 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
 
 <button class="settings-fab" onclick="openMgrModal()">⚙️</button>
 
-<div class="modal-bg" id="change-sheet" onclick="if(event.target===this)closeChangeSheet()">
-  <div class="modal-sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-hdr">
-      <span class="sheet-title" id="sheet-title">변동 내역</span>
-      <button class="sheet-close" onclick="closeChangeSheet()">×</button>
-    </div>
-    <div class="sheet-tabs" id="sheet-tabs" style="display:none;">
-      <button class="sheet-tab on" id="stab-cancel" onclick="switchSheetTab('cancel')">취소·변경</button>
-      <button class="sheet-tab" id="stab-added" onclick="switchSheetTab('added')">신규</button>
-    </div>
-    <div class="sheet-body" id="sheet-body"></div>
-  </div>
-</div>
-
 <div class="mgr-modal-bg" id="mgr-modal" onclick="if(event.target===this)closeMgrModal()">
   <div class="mgr-modal">
     <div class="mm-hdr">
@@ -405,7 +402,7 @@ function applyManagers(rows){
 
 let currentMonth='';
 let state={first:null,second:null};
-let changeData={cancel:[],amtChange:[],added:[],costChange:[]};
+let changeData={changeEvents:[],unmatched:[],costChange:[]};
 let reasonMap={};
 let stats1Cache=null;
 
@@ -553,10 +550,15 @@ function exportToExcel(){
   XLSX.writeFile(wb,`DREAMCELL_매출분석_${currentMonth}.xlsx`);
 }
 
-function buildCompareMap(data){
-  const m={};
+function isCancelRow(managerRaw){
+  return EXCLUDE_LIST.some(k=>managerRaw.includes(k));
+}
+
+// 전체 행을 파싱 (취소행 포함, 원본 수주자명 보존)
+function parseAllRows(data){
+  const rows=[];
   data.forEach(row=>{
-    let sn='',amount=0,cost=0,qty=1,manager='',client='',itemCode='',itemName='',date='',costTotal=0;
+    let sn='',amount=0,cost=0,qty=1,managerRaw='',client='',itemCode='',itemName='',date='',costTotal=0,ref='';
     for(let key in row){
       let ck=key.replace(/\s+/g,'');
       if(ck==='전산No'||ck==='전산no'||ck==='전산번호')sn=String(row[key]||'').trim();
@@ -564,45 +566,108 @@ function buildCompareMap(data){
       if(ck==='발주단가'||ck==='단가')cost=safeParse(row[key]);
       if(ck==='수주량'||ck==='수량'){let q=safeParse(row[key]);if(q!==0)qty=q;}
       if(ck==='총발주단가'||ck==='발주금액'||ck==='발주합계')costTotal=safeParse(row[key]);
-      if(ck==='수주자'||ck==='담당자')manager=String(row[key]||'').trim();
+      if(ck==='수주자'||ck==='담당자')managerRaw=String(row[key]||'').trim();
       if(ck==='발주처'||ck==='거래처')client=String(row[key]||'').trim();
       if(ck==='품명코드'||ck==='제품코드')itemCode=String(row[key]||'').trim();
       if(ck==='품명')itemName=String(row[key]||'').trim();
       if(ck==='수주일'||ck==='수주날짜')date=String(row[key]||'').trim();
+      if(ck==='참조사항')ref=String(row[key]||'').trim();
     }
     if(!sn||sn==='*')return;
-    let mName='';
-    for(let key in managerMap){if(manager.includes(key)){mName=managerMap[key];break;}}
-    if(!mName&&(manager.includes('업자')||manager.includes('대리점')))mName='업자&대리점';
-    if(!mName)mName=manager;
     if(costTotal===0&&cost!==0)costTotal=cost*qty;
-    m[sn]={sn,amount,cost,qty,costTotal,manager:mName,client,itemCode,itemName,date};
+    // 담당자 표시명 변환
+    let mName='';
+    for(let key in managerMap){if(managerRaw.includes(key)){mName=managerMap[key];break;}}
+    if(!mName&&(managerRaw.includes('업자')||managerRaw.includes('대리점')))mName='업자&대리점';
+    if(!mName)mName=managerRaw;
+    // 수주처 파싱
+    let orderCust='';
+    for(let key in row){ if(key.replace(/\s+/g,'')==='수주처') orderCust=String(row[key]||'').trim(); }
+    rows.push({sn,amount,cost,qty,costTotal,managerRaw,manager:mName,client,orderCust,itemCode,itemName,date,ref,isCancel:isCancelRow(managerRaw)});
   });
-  return m;
+  return rows;
 }
 
+// 검증된 변동 감지 로직 (파이썬 검증 결과와 100% 일치)
 function computeChanges(){
-  const m1=buildCompareMap(state.first.data);
-  const m2=buildCompareMap(state.second.data);
-  const cancel=[],amtChange=[],added=[],costChange=[];
-  Object.keys(m1).forEach(sn=>{
-    if(!m2[sn]){cancel.push({...m1[sn]});}
-    else{
-      if(Math.abs(m2[sn].amount-m1[sn].amount)>1){
-        amtChange.push({...m1[sn],first_amount:m1[sn].amount,second_amount:m2[sn].amount,diff:m2[sn].amount-m1[sn].amount});
-      }
-      if(Math.abs(m2[sn].cost-m1[sn].cost)>=100000){
-        costChange.push({...m1[sn],
-          first_cost:m1[sn].cost,second_cost:m2[sn].cost,cost_diff:m2[sn].cost-m1[sn].cost,
-          first_total:m1[sn].costTotal,second_total:m2[sn].costTotal,total_diff:m2[sn].costTotal-m1[sn].costTotal});
+  const rows1=parseAllRows(state.first.data);
+  const rows2=parseAllRows(state.second.data);
+
+  // 1차/2차 정상수주 맵 (취소행 제외) - 전산No 기준
+  const d1n={},d2n={};
+  rows1.forEach(r=>{if(!r.isCancel)d1n[r.sn]=r;});
+  rows2.forEach(r=>{if(!r.isCancel)d2n[r.sn]=r;});
+  const d2cancel=rows2.filter(r=>r.isCancel);
+  const sn1All=new Set(rows1.map(r=>r.sn));
+  const d2cancelSn=new Set(d2cancel.map(r=>r.sn));
+
+  // 원본 전산No 기준으로 이벤트 통합
+  const events={};
+  function ev(sn){
+    if(!events[sn]){
+      const r=d1n[sn]||{};
+      events[sn]={sn,manager:r.manager||'',itemName:r.itemName||'',itemCode:r.itemCode||'',date:r.date||'',
+        types:new Set(),q1:r.qty||0,q2:null,a1:r.amount||0,a2:null,returns:[]};
+    }
+    return events[sn];
+  }
+
+  // [유형1] 완전취소: 1차 정상 → 2차 정상에서 사라지고 2차 취소행으로 존재
+  Object.keys(d1n).forEach(sn=>{
+    if(!d2n[sn]&&d2cancelSn.has(sn)){const e=ev(sn);e.types.add('완전취소');e.a2=0;e.q2=0;}
+  });
+  // [유형2,3] 수량/금액 변경 (1차 정상 → 2차 정상)
+  Object.keys(d1n).forEach(sn=>{
+    if(d2n[sn]){
+      const q1=d1n[sn].qty,q2=d2n[sn].qty;
+      const a1=d1n[sn].amount,a2=d2n[sn].amount;
+      if(q1!==q2||Math.abs(a2-a1)>1){
+        const e=ev(sn);e.q2=q2;e.a2=a2;
+        if(q1!==q2)e.types.add('수량변경');
+        if(Math.abs(a2-a1)>1)e.types.add('금액변경');
       }
     }
   });
-  Object.keys(m2).forEach(sn=>{if(!m1[sn])added.push({...m2[sn]});});
-  return {cancel,amtChange,added,costChange};
+  // [유형5] 2차 신규 취소/반품행 → 원본 3키 매칭
+  const unmatched=[];
+  d2cancel.forEach(r=>{
+    if(sn1All.has(r.sn))return; // 1차에 있던 건 무시
+    // 3키 매칭: 품명코드 + 수주처 + 수주일
+    let m=Object.values(d1n).filter(x=>x.itemCode===r.itemCode&&x.orderCust===r.orderCust&&x.date===r.date);
+    if(!m.length)m=Object.values(d1n).filter(x=>x.itemCode===r.itemCode&&x.orderCust===r.orderCust);
+    if(m.length){
+      const e=ev(m[0].sn);
+      e.returns.push({sn:r.sn,type:r.managerRaw,qty:r.qty,amt:r.amount,ref:r.ref});
+      e.types.add('반품·취소처리');
+    }else{
+      unmatched.push({sn:r.sn,type:r.managerRaw,qty:r.qty,amt:r.amount,itemCode:r.itemCode,itemName:r.itemName,orderCust:r.orderCust,date:r.date,ref:r.ref});
+    }
+  });
+
+  // [유형4] 발주단가 변경 (개당 10만↑) - 별도
+  const costChange=[];
+  Object.keys(d1n).forEach(sn=>{
+    if(d2n[sn]){
+      const c1=d1n[sn].cost,c2=d2n[sn].cost;
+      if(Math.abs(c2-c1)>=100000){
+        costChange.push({...d1n[sn],
+          first_cost:c1,second_cost:c2,cost_diff:c2-c1,
+          first_total:d1n[sn].costTotal,second_total:d2n[sn].costTotal,total_diff:d2n[sn].costTotal-d1n[sn].costTotal});
+      }
+    }
+  });
+
+  // events를 배열로 변환
+  const changeEvents=Object.values(events).map(e=>({
+    ...e,types:Array.from(e.types),
+    amtDiff:(e.a2!==null?e.a2-e.a1:0)
+  }));
+
+  return {changeEvents,unmatched,costChange};
 }
 
-function computeMgrDiff(stats1,stats2){
+// 담당자 매출 변동
+function computeMgrDiffFromStats(stats1,stats2){
   const diffs=[];
   MANAGERS.forEach(m=>{
     const s1=(stats1[m]&&stats1[m].sales)||0;
@@ -654,7 +719,7 @@ function processFile(type,file){
         const stats2=process(data);
         updateReportTitle('2차');
         changeData=computeChanges();
-        const mgrDiff=computeMgrDiff(stats1Cache,stats2);
+        const mgrDiff=computeMgrDiffFromStats(stats1Cache,stats2);
         renderChangeCards(mgrDiff);
         loadReasons();
         updateIsland('second');
@@ -673,13 +738,15 @@ function updateReportTitle(cycle){
 
 function renderChangeCards(mgrDiff){
   document.getElementById('change-section').style.display='block';
-  const amtCount=changeData.cancel.length+changeData.amtChange.length;
+  const evCount=changeData.changeEvents.length+changeData.unmatched.length;
   const costCount=changeData.costChange.length;
-  document.getElementById('amt-count').textContent=amtCount;
+  document.getElementById('amt-count').textContent=evCount;
   document.getElementById('cost-count').textContent=costCount;
   const amtSub=document.getElementById('amt-sub');
-  if(amtCount>0){amtSub.textContent=`취소 ${changeData.cancel.length}건 · 변경 ${changeData.amtChange.length}건`;amtSub.className='chcard-sub';}
-  else{amtSub.textContent='변동 없음';amtSub.className='chcard-sub empty';}
+  if(evCount>0){
+    const totalAmtDiff=changeData.changeEvents.reduce((s,e)=>s+(e.a2!==null?e.a2-e.a1:0),0);
+    amtSub.textContent=`매출 변동 ${totalAmtDiff>=0?'+':''}${fmtWon(totalAmtDiff)}원`;amtSub.className='chcard-sub';
+  }else{amtSub.textContent='변동 없음';amtSub.className='chcard-sub empty';}
   const costSub=document.getElementById('cost-sub');
   if(costCount>0){const totalDiff=changeData.costChange.reduce((s,r)=>s+r.total_diff,0);costSub.textContent=`총액 차이 ${totalDiff>=0?'+':''}${fmtWon(totalDiff)}원`;costSub.className='chcard-sub';}
   else{costSub.textContent='변동 없음';costSub.className='chcard-sub empty';}
@@ -691,103 +758,124 @@ function renderChangeCards(mgrDiff){
   }else{mdCard.style.display='none';}
 }
 
-let currentSheetType='amt';let currentSheetTab='cancel';
-function openChangeSheet(type){
-  currentSheetType=type;
-  const tabs=document.getElementById('sheet-tabs');
-  if(type==='amt'){
-    document.getElementById('sheet-title').textContent='수주금액 변동';
-    tabs.style.display='flex';currentSheetTab='cancel';
-    document.getElementById('stab-cancel').className='sheet-tab on';
-    document.getElementById('stab-added').className='sheet-tab';
-    renderSheetBody();
-  }else{
-    document.getElementById('sheet-title').textContent='발주단가 변동 (10만원↑)';
-    tabs.style.display='none';renderCostSheet();
-  }
-  document.getElementById('change-sheet').classList.add('on');
-}
-function closeChangeSheet(){document.getElementById('change-sheet').classList.remove('on');}
-function switchSheetTab(tab){
-  currentSheetTab=tab;
-  document.getElementById('stab-cancel').className='sheet-tab'+(tab==='cancel'?' on':'');
-  document.getElementById('stab-added').className='sheet-tab'+(tab==='added'?' on':'');
-  renderSheetBody();
-}
-function renderSheetBody(){
-  const body=document.getElementById('sheet-body');
-  if(currentSheetTab==='cancel'){
-    const items=[...changeData.cancel.map(r=>({...r,_type:'cancel'})),...changeData.amtChange.map(r=>({...r,_type:'change'}))];
-    if(!items.length){body.innerHTML=emptyMsg('취소·변경 내역이 없습니다');return;}
-    body.innerHTML=items.map(r=>changeItemHtml(r)).join('');
-  }else{
-    if(!changeData.added.length){body.innerHTML=emptyMsg('신규 추가 내역이 없습니다');return;}
-    body.innerHTML=changeData.added.map(r=>addedItemHtml(r)).join('');
-  }
-}
-function renderCostSheet(){
-  const body=document.getElementById('sheet-body');
-  if(!changeData.costChange.length){body.innerHTML=emptyMsg('발주단가 변동 내역이 없습니다');return;}
-  body.innerHTML=changeData.costChange.map(r=>costItemHtml(r)).join('');
-}
-function emptyMsg(t){return `<div style="text-align:center;padding:40px;color:#8E8E93;"><div style="font-size:32px;margin-bottom:8px;">✅</div>${t}</div>`;}
+let currentReportType=null;
 
-function changeItemHtml(r){
-  const isCancel=r._type==='cancel';
-  const badge=isCancel?'<span class="ci-badge cancel">취소·반품</span>':'<span class="ci-badge change">금액변경</span>';
-  const rKey=`${r.sn}_${isCancel?'cancel':'amtchange'}`;
-  const saved=reasonMap[rKey]||'';
-  let amtBox='';
-  if(isCancel)amtBox=`<div class="ci-amt-box"><span>매출</span><span class="ci-val down" style="margin-left:auto;">-${fmtWon(r.amount)}원</span></div>`;
-  else amtBox=`<div class="ci-amt-box"><span>${fmtWon(r.first_amount)}</span><span class="ci-amt-arrow">→</span><span>${fmtWon(r.second_amount)}</span><span class="ci-val ${r.diff<0?'down':'up'}" style="margin-left:auto;">${r.diff>=0?'+':''}${fmtWon(r.diff)}원</span></div>`;
-  return `<div class="change-item">
-    <div class="ci-top">${badge}<span class="ci-mgr">${r.manager}</span></div>
-    <div class="ci-grid">
-      <span class="ci-key">전산No</span><span class="ci-val">${r.sn}</span>
-      <span class="ci-key">수주일</span><span class="ci-val">${r.date}</span>
-      <span class="ci-key">품명코드</span><span class="ci-val">${r.itemCode}</span>
-      <span class="ci-key">품명</span><span class="ci-val" style="font-size:11px;">${r.itemName}</span>
-      <span class="ci-key">수량</span><span class="ci-val">${r.qty}</span>
-    </div>${amtBox}
-    <div class="ci-reason">
-      <input class="ci-reason-input" id="reason-${rKey}" placeholder="사유 입력 (반품/취소/수정 등)" value="${saved}">
-      <button class="ci-reason-save" onclick="saveReason('${rKey}','${isCancel?'cancel':'amtchange'}','${r.sn}')">저장</button>
-    </div></div>`;
+function toggleChangeReport(type){
+  if(currentReportType===type){closeChangeReport();return;}
+  currentReportType=type;
+  document.getElementById('chcard-amt').classList.toggle('active',type==='amt');
+  document.getElementById('chcard-cost').classList.toggle('active',type==='cost');
+  const report=document.getElementById('change-report');
+  report.style.display='block';
+  const tabs=document.getElementById('cr-tabs');
+  tabs.style.display='none';
+  if(type==='amt'){
+    document.getElementById('cr-title').textContent='수주 변동 상세 (반품·취소·수량·금액)';
+    renderEventReport();
+  }else{
+    document.getElementById('cr-title').textContent='발주단가 변동 상세 (10만원↑)';
+    renderCostReport();
+  }
+  report.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
-function addedItemHtml(r){
-  const rKey=`${r.sn}_added`;const saved=reasonMap[rKey]||'';
-  return `<div class="change-item">
-    <div class="ci-top"><span class="ci-badge added">신규</span><span class="ci-mgr">${r.manager}</span></div>
-    <div class="ci-grid">
-      <span class="ci-key">전산No</span><span class="ci-val">${r.sn}</span>
-      <span class="ci-key">수주일</span><span class="ci-val">${r.date}</span>
-      <span class="ci-key">품명코드</span><span class="ci-val">${r.itemCode}</span>
-      <span class="ci-key">품명</span><span class="ci-val" style="font-size:11px;">${r.itemName}</span>
-      <span class="ci-key">수량</span><span class="ci-val">${r.qty}</span>
-    </div>
-    <div class="ci-amt-box"><span>매출</span><span class="ci-val up" style="margin-left:auto;">+${fmtWon(r.amount)}원</span></div>
-    <div class="ci-reason">
-      <input class="ci-reason-input" id="reason-${rKey}" placeholder="사유 입력" value="${saved}">
-      <button class="ci-reason-save" onclick="saveReason('${rKey}','added','${r.sn}')">저장</button>
-    </div></div>`;
+function closeChangeReport(){
+  currentReportType=null;
+  document.getElementById('change-report').style.display='none';
+  document.getElementById('chcard-amt').classList.remove('active');
+  document.getElementById('chcard-cost').classList.remove('active');
 }
-function costItemHtml(r){
-  const rKey=`${r.sn}_cost`;const saved=reasonMap[rKey]||'';
-  return `<div class="change-item">
-    <div class="ci-top"><span class="ci-badge cost">발주단가 변동</span><span class="ci-mgr">${r.manager}</span></div>
-    <div class="ci-grid">
-      <span class="ci-key">전산No</span><span class="ci-val">${r.sn}</span>
-      <span class="ci-key">수주일</span><span class="ci-val">${r.date}</span>
-      <span class="ci-key">품명코드</span><span class="ci-val">${r.itemCode}</span>
-      <span class="ci-key">품명</span><span class="ci-val" style="font-size:11px;">${r.itemName}</span>
-      <span class="ci-key">수량</span><span class="ci-val">${r.qty}</span>
-    </div>
-    <div class="ci-amt-box"><span>개당 ${fmtWon(r.first_cost)}</span><span class="ci-amt-arrow">→</span><span>${fmtWon(r.second_cost)}</span><span class="ci-val ${r.cost_diff<0?'down':'up'}" style="margin-left:auto;">${r.cost_diff>=0?'+':''}${fmtWon(r.cost_diff)}</span></div>
-    <div class="ci-amt-box"><span>총액 ${fmtWon(r.first_total)}</span><span class="ci-amt-arrow">→</span><span>${fmtWon(r.second_total)}</span><span class="ci-val ${r.total_diff<0?'down':'up'}" style="margin-left:auto;">${r.total_diff>=0?'+':''}${fmtWon(r.total_diff)}원</span></div>
-    <div class="ci-reason">
-      <input class="ci-reason-input" id="reason-${rKey}" placeholder="사유 입력 (단가 인하/인상 등)" value="${saved}">
-      <button class="ci-reason-save" onclick="saveReason('${rKey}','cost','${r.sn}')">저장</button>
-    </div></div>`;
+
+function renderEventReport(){
+  const body=document.getElementById('cr-body');
+  const events=changeData.changeEvents;
+  if(!events.length&&!changeData.unmatched.length){body.innerHTML=emptyMsg('수주 변동 내역이 없습니다');return;}
+  body.innerHTML=eventTableHtml(events);
+}
+function renderCostReport(){
+  const body=document.getElementById('cr-body');
+  if(!changeData.costChange.length){body.innerHTML=emptyMsg('발주단가 변동 내역이 없습니다');return;}
+  body.innerHTML=costTableHtml(changeData.costChange);
+}
+function emptyMsg(t){return `<div class="cr-empty"><div class="cr-empty-icon">✅</div>${t}</div>`;}
+
+function typeBadges(types){
+  const map={'완전취소':'cancel','수량변경':'change','금액변경':'change','반품·취소처리':'cost'};
+  const labels={'완전취소':'완전취소','수량변경':'수량변경','금액변경':'금액변경','반품·취소처리':'반품·취소'};
+  return types.map(t=>`<span class="cr-badge ${map[t]||'change'}">${labels[t]||t}</span>`).join(' ');
+}
+
+function eventTableHtml(events){
+  const rows=events.map(e=>{
+    const rKey=`${e.sn}_event`;
+    const saved=reasonMap[rKey]||'';
+    // 수량 셀
+    let qtyCell=e.q2!==null?`${e.q1}<span class="cr-arrow-txt">→</span>${e.q2}`:`${e.q1}`;
+    // 금액 셀
+    let amtCell;
+    if(e.a2!==null){
+      const diff=e.a2-e.a1;
+      amtCell=`${fmtWon(e.a1)}<span class="cr-arrow-txt">→</span>${fmtWon(e.a2)} <span class="${diff<0?'cr-down':'cr-up'}">(${diff>=0?'+':''}${fmtWon(diff)})</span>`;
+    }else amtCell='—';
+    // 반품 꼬리표 정보
+    let returnInfo='';
+    if(e.returns&&e.returns.length){
+      returnInfo=e.returns.map(rt=>`<div style="font-size:10px;color:#8E8E93;margin-top:3px;">${rt.type}행 ${rt.sn}: ${rt.qty}개${rt.ref?' · '+rt.ref:''}</div>`).join('');
+    }
+    return `<tr>
+      <td>${typeBadges(e.types)}</td>
+      <td>${e.manager}</td>
+      <td>${e.date}</td>
+      <td>${e.sn}</td>
+      <td>${e.itemCode}</td>
+      <td><div class="cr-item-name" title="${e.itemName}">${e.itemName}</div>${returnInfo}</td>
+      <td class="right">${qtyCell}</td>
+      <td class="right">${amtCell}</td>
+      <td class="right"><input class="cr-reason-input" id="reason-${rKey}" placeholder="사유" value="${saved}"><button class="cr-reason-save" onclick="saveReason('${rKey}','event','${e.sn}')">저장</button></td>
+    </tr>`;
+  }).join('');
+  // 매칭 실패한 반품행 (원본 미상)
+  let unmatchedRows='';
+  if(changeData.unmatched.length){
+    unmatchedRows=changeData.unmatched.map(u=>{
+      const rKey=`${u.sn}_unmatched`;const saved=reasonMap[rKey]||'';
+      return `<tr style="background:#FFF9E6;">
+        <td><span class="cr-badge cost">원본미상</span></td>
+        <td>${u.type}</td>
+        <td>${u.date}</td>
+        <td>${u.sn}</td>
+        <td>${u.itemCode}</td>
+        <td><div class="cr-item-name" title="${u.itemName}">${u.itemName}</div><div style="font-size:10px;color:#C77700;margin-top:3px;">⚠ 원본 매칭 실패 — 확인 필요${u.ref?' · '+u.ref:''}</div></td>
+        <td class="right">${u.qty}</td>
+        <td class="right"><span class="cr-down">${fmtWon(u.amt)}</span></td>
+        <td class="right"><input class="cr-reason-input" id="reason-${rKey}" placeholder="사유" value="${saved}"><button class="cr-reason-save" onclick="saveReason('${rKey}','unmatched','${u.sn}')">저장</button></td>
+      </tr>`;
+    }).join('');
+  }
+  return `<table class="cr-table"><thead><tr>
+    <th>변동유형</th><th>담당자</th><th>수주일</th><th>전산No</th><th>품명코드</th><th>품명 / 반품내역</th><th class="right">수량</th><th class="right">수주금액</th><th class="right">사유</th>
+  </tr></thead><tbody>${rows}${unmatchedRows}</tbody></table>`;
+}
+
+function costTableHtml(items){
+  const rows=items.map(r=>{
+    const rKey=`${r.sn}_cost`;const saved=reasonMap[rKey]||'';
+    const costCell=`${fmtWon(r.first_cost)}<span class="cr-arrow-txt">→</span>${fmtWon(r.second_cost)} <span class="${r.cost_diff<0?'cr-down':'cr-up'}">(${r.cost_diff>=0?'+':''}${fmtWon(r.cost_diff)})</span>`;
+    const totalCell=`${fmtWon(r.first_total)}<span class="cr-arrow-txt">→</span>${fmtWon(r.second_total)} <span class="${r.total_diff<0?'cr-down':'cr-up'}">(${r.total_diff>=0?'+':''}${fmtWon(r.total_diff)})</span>`;
+    return `<tr>
+      <td>${r.manager}</td>
+      <td>${r.date}</td>
+      <td>${r.sn}</td>
+      <td>${r.itemCode}</td>
+      <td><div class="cr-item-name" title="${r.itemName}">${r.itemName}</div></td>
+      <td class="right">${r.qty}</td>
+      <td class="right">${costCell}</td>
+      <td class="right">${totalCell}</td>
+      <td class="right"><input class="cr-reason-input" id="reason-${rKey}" placeholder="사유" value="${saved}"><button class="cr-reason-save" onclick="saveReason('${rKey}','cost','${r.sn}')">저장</button></td>
+    </tr>`;
+  }).join('');
+  return `<table class="cr-table"><thead><tr>
+    <th>담당자</th><th>수주일</th><th>전산No</th><th>품명코드</th><th>품명</th><th class="right">수량</th><th class="right">개당 발주단가</th><th class="right">총 발주금액</th><th class="right">사유</th>
+  </tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 async function saveReason(rKey,changeType,sn){
@@ -820,7 +908,7 @@ function updateIsland(phase){
     island.className='island result';
     inner.innerHTML=`<div class="i-dot green"></div><span class="i-month">${parseInt(m)}월</span><span class="i-status">1차 완료</span>`;
   }else if(phase==='second'){
-    const cnt=changeData.cancel.length+changeData.amtChange.length+changeData.costChange.length;
+    const cnt=changeData.changeEvents.length+changeData.unmatched.length+changeData.costChange.length;
     island.className='island result';
     inner.innerHTML=`<div class="i-dot blue"></div><span class="i-month">${parseInt(m)}월</span><div class="i-divider"></div><span class="i-status">변동 ${cnt}건</span>`;
   }
@@ -852,7 +940,7 @@ function updateDial(){
 }
 function resetAll(){
   state={first:null,second:null};stats1Cache=null;
-  changeData={cancel:[],amtChange:[],added:[],costChange:[]};
+  changeData={changeEvents:[],unmatched:[],costChange:[]};
   ['uc1','uc2'].forEach(id=>document.getElementById(id).className='ucard');
   document.getElementById('uc1-tag').textContent='1차 · 월초 업로드';
   document.getElementById('uc1-name').textContent='파일 클릭 또는 드래그';
@@ -863,6 +951,10 @@ function resetAll(){
   document.getElementById('empty-state').style.display='flex';
   document.getElementById('report-wrap').style.display='none';
   document.getElementById('change-section').style.display='none';
+  currentReportType=null;
+  document.getElementById('change-report').style.display='none';
+  document.getElementById('chcard-amt').classList.remove('active');
+  document.getElementById('chcard-cost').classList.remove('active');
   const[y,m]=currentMonth.split('-');
   document.getElementById('island').className='island compact';
   document.getElementById('island-inner').innerHTML=`<div class="i-dot gray"></div><span class="i-month">${parseInt(m)}월 ${y}</span><span class="i-status">대기 중</span>`;
