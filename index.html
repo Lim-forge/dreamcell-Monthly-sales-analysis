@@ -31,17 +31,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;bac
 .mp-select{border:none;background:transparent;font-size:10px;color:#0A84FF;cursor:pointer;text-align:center;font-weight:600;}
 
 .upload-cards{display:flex;gap:10px;flex:1;}
-.ucard{flex:1;background:#fff;border:2px dashed #D1D1D6;border-radius:16px;padding:14px 16px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.ucard{position:relative;flex:1;background:#fff;border:2px dashed #D1D1D6;border-radius:16px;padding:14px 16px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.04);}
 .ucard:hover{border-color:#0A84FF;}
 .ucard.done-1{border-style:solid;border-color:#30D158;background:#F1FBF3;}
 .ucard.done-2{border-style:solid;border-color:#0A84FF;background:#EEF6FF;}
+.ucard.preview-1,.ucard.preview-2{border-style:solid;border-color:#FF9F0A;background:#FFF8EF;}
 .ucard.drag-over{border-color:#FF9F0A;background:#FFF8EF;transform:scale(1.01);}
 .uc-tag{font-size:10px;font-weight:700;letter-spacing:.05em;color:#8E8E93;margin-bottom:4px;}
 .ucard.done-1 .uc-tag{color:#248A3D;}
 .ucard.done-2 .uc-tag{color:#0A6FD8;}
+.ucard.preview-1 .uc-tag,.ucard.preview-2 .uc-tag{color:#C77700;}
 .uc-name{font-size:13px;font-weight:600;color:#1C1C1E;}
 .uc-date{font-size:11px;color:#8E8E93;margin-top:2px;}
+.uc-actions{display:none;position:absolute;top:8px;right:8px;gap:6px;}
+.ucard.preview-1 .uc-actions,.ucard.preview-2 .uc-actions{display:flex;}
+.uc-del{width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,.08);color:#8E8E93;font-size:13px;line-height:22px;text-align:center;cursor:pointer;padding:0;}
+.uc-del:hover{background:#FFEBE9;color:#D70015;}
+.uc-save{padding:0 10px;height:22px;border-radius:11px;border:none;background:#1C1C1E;color:#fff;font-size:11px;font-weight:700;cursor:pointer;}
+.uc-save:hover{background:#0A84FF;}
 input[type=file]{display:none;}
+.fresh-btn{background:#fff;border:1px solid #E5E5EA;border-radius:16px;padding:0 16px;font-size:12px;font-weight:700;color:#3A3A3C;cursor:pointer;flex-shrink:0;}
+.fresh-btn:hover{background:#F2F2F7;}
 
 .body-zone{padding:4px 20px 40px;}
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;color:#8E8E93;gap:10px;text-align:center;}
@@ -148,6 +158,9 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
 .mgr-modal{background:#fff;border-radius:20px;width:500px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;}
 .mm-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:0.5px solid #E5E5EA;}
 .mm-title{font-size:15px;font-weight:700;}
+.mm-tabs{display:flex;gap:6px;padding:10px 22px 0;border-bottom:0.5px solid #E5E5EA;}
+.mm-tab{padding:8px 4px 10px;border:none;background:none;font-size:12px;font-weight:700;color:#8E8E93;cursor:pointer;border-bottom:2px solid transparent;}
+.mm-tab.on{color:#1C1C1E;border-bottom-color:#1C1C1E;}
 .mm-close{width:30px;height:30px;border-radius:50%;background:#E5E5EA;border:none;font-size:16px;color:#8E8E93;cursor:pointer;}
 .mm-body{flex:1;overflow-y:auto;padding:18px 22px;}
 .mm-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
@@ -210,6 +223,10 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
       <div class="ucard" id="uc1"
         onclick="document.getElementById('f1').click()"
         ondragover="onDragOver(event,this)" ondragleave="onDragLeave(this)" ondrop="onDrop(event,1,this)">
+        <div class="uc-actions">
+          <button class="uc-save" id="uc1-save" style="display:none;" onclick="openSaveModal(1,event)">저장</button>
+          <button class="uc-del" onclick="clearPreview(1,event)" title="미리보기 빼기">×</button>
+        </div>
         <div class="uc-tag" id="uc1-tag">1차 · 월초 업로드</div>
         <div class="uc-name" id="uc1-name">파일 클릭 또는 드래그</div>
         <div class="uc-date" id="uc1-date">수주 데이터 (.xlsx)</div>
@@ -219,12 +236,18 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
       <div class="ucard" id="uc2"
         onclick="if(state.first)document.getElementById('f2').click();else showToast('1차 파일을 먼저 업로드하세요')"
         ondragover="onDragOver(event,this)" ondragleave="onDragLeave(this)" ondrop="onDrop(event,2,this)">
+        <div class="uc-actions">
+          <button class="uc-save" id="uc2-save" style="display:none;" onclick="openSaveModal(2,event)">저장</button>
+          <button class="uc-del" onclick="clearPreview(2,event)" title="미리보기 빼기">×</button>
+        </div>
         <div class="uc-tag" id="uc2-tag">2차 · 월말 업로드</div>
         <div class="uc-name" id="uc2-name">1차 업로드 후 가능</div>
         <div class="uc-date" id="uc2-date">금액·발주단가 변동 자동 확인</div>
       </div>
       <input type="file" id="f2" accept=".xlsx,.xls" onchange="handleFile(2,this)">
     </div>
+
+    <button class="fresh-btn" onclick="startFresh()" title="화면을 비우고 새로 시작 (저장된 데이터는 안전합니다)">↻ 새로 생성</button>
   </div>
 </div>
 
@@ -345,20 +368,86 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
 <div class="mgr-modal-bg" id="mgr-modal" onclick="if(event.target===this)closeMgrModal()">
   <div class="mgr-modal">
     <div class="mm-hdr">
-      <span class="mm-title">⚙️ 담당자 설정</span>
+      <span class="mm-title">⚙️ 설정</span>
       <button class="mm-close" onclick="closeMgrModal()">×</button>
     </div>
+    <div class="mm-tabs">
+      <button class="mm-tab on" id="mm-tab-mgr" onclick="switchSettingsTab('mgr')">담당자</button>
+      <button class="mm-tab" id="mm-tab-transfer" onclick="switchSettingsTab('transfer')">이관규칙</button>
+      <button class="mm-tab" id="mm-tab-brand" onclick="switchSettingsTab('brand')">브랜드</button>
+    </div>
     <div class="mm-body">
-      <div id="mm-list" class="mm-list"></div>
-      <div class="mm-add">
-        <div class="mm-add-col"><span class="mm-add-lbl">엑셀 원본 이름</span><input class="mm-add-inp" id="mm-raw" placeholder="예: 홍길동"></div>
-        <div class="mm-add-col"><span class="mm-add-lbl">표시 이름</span><input class="mm-add-inp" id="mm-disp" placeholder="예: 홍길동 대리"></div>
-        <button class="mm-add-btn" onclick="addManager()">추가</button>
+      <div id="mm-panel-mgr">
+        <div id="mm-list" class="mm-list"></div>
+        <div class="mm-add">
+          <div class="mm-add-col"><span class="mm-add-lbl">엑셀 원본 이름</span><input class="mm-add-inp" id="mm-raw" placeholder="예: 홍길동"></div>
+          <div class="mm-add-col"><span class="mm-add-lbl">표시 이름</span><input class="mm-add-inp" id="mm-disp" placeholder="예: 홍길동 대리"></div>
+          <button class="mm-add-btn" onclick="addManager()">추가</button>
+        </div>
+      </div>
+      <div id="mm-panel-transfer" style="display:none;">
+        <div style="font-size:11px;color:#8E8E93;margin-bottom:10px;line-height:1.5;">퇴사자 등 특정 이름으로 엑셀에 찍히는 매출·선발행을 다른 담당자에게 100% 이관합니다.<br>과거 저장된 달에는 영향 없이, 설정 이후 새로 저장되는 데이터부터 적용됩니다.</div>
+        <div id="tf-list" class="mm-list"></div>
+        <div class="mm-add" style="flex-wrap:wrap;">
+          <div class="mm-add-col"><span class="mm-add-lbl">퇴사자(엑셀 원본이름)</span><input class="mm-add-inp" id="tf-from" placeholder="예: 최춘원"></div>
+          <div class="mm-add-col"><span class="mm-add-lbl">받을 담당자</span><select class="mm-add-inp" id="tf-to"></select></div>
+          <div class="mm-add-col"><span class="mm-add-lbl">표시방식</span>
+            <select class="mm-add-inp" id="tf-mode"><option value="merged">섞어서 표시</option><option value="separate">구분해서 표시</option></select>
+          </div>
+          <button class="mm-add-btn" onclick="addTransfer()">추가</button>
+        </div>
+      </div>
+      <div id="mm-panel-brand" style="display:none;">
+        <div style="font-size:11px;color:#8E8E93;margin-bottom:10px;line-height:1.5;">"3.제조사별 상세" 표에만 적용됩니다. 총매출/담당자 매출에는 영향이 없습니다.<br>숨김 처리해도 데이터는 안전하며, 언제든 다시 보이게 할 수 있습니다.</div>
+        <div class="mm-add" style="flex-wrap:wrap;margin-bottom:4px;">
+          <div class="mm-add-col"><span class="mm-add-lbl">카테고리</span>
+            <select class="mm-add-inp" id="brand-cat"><option value="line">Line (해외직수입)</option><option value="special">특판 (국내유통)</option></select>
+          </div>
+          <div class="mm-add-col"><span class="mm-add-lbl">브랜드명</span><input class="mm-add-inp" id="brand-name" placeholder="예: BIOWEST"></div>
+          <div class="mm-add-col"><span class="mm-add-lbl">핵심소계 포함</span>
+            <select class="mm-add-inp" id="brand-core"><option value="0">아니오</option><option value="1">예</option></select>
+          </div>
+          <button class="mm-add-btn" onclick="addBrand()">추가</button>
+        </div>
+        <div id="brand-list-line"></div>
+        <div id="brand-list-special"></div>
       </div>
     </div>
     <div class="mm-footer">
       <button class="mm-cancel" onclick="closeMgrModal()">취소</button>
-      <button class="mm-save" onclick="saveManagers()">저장</button>
+      <button class="mm-save" onclick="saveCurrentSettingsTab()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 저장 확인 모달: 업로드한 미리보기를 실제로 어느 월/차수에 저장할지 직접 지정 -->
+<div class="mgr-modal-bg" id="save-modal" onclick="if(event.target===this)closeSaveModal()">
+  <div class="mgr-modal" style="width:440px;">
+    <div class="mm-hdr">
+      <span class="mm-title">💾 저장</span>
+      <button class="mm-close" onclick="closeSaveModal()">×</button>
+    </div>
+    <div class="mm-body">
+      <div class="mm-add-col" style="margin-bottom:12px;"><span class="mm-add-lbl">저장할 월</span>
+        <select class="mm-add-inp" id="save-month" style="width:100%;" onchange="checkSaveOverwrite()"></select>
+      </div>
+      <div class="mm-add-col" style="margin-bottom:12px;"><span class="mm-add-lbl">차수</span>
+        <div style="display:flex;gap:14px;padding:8px 2px;">
+          <label style="font-size:13px;display:flex;align-items:center;gap:5px;"><input type="radio" name="save-cycle" value="1" onchange="checkSaveOverwrite()">1차</label>
+          <label style="font-size:13px;display:flex;align-items:center;gap:5px;"><input type="radio" name="save-cycle" value="2" onchange="checkSaveOverwrite()">2차</label>
+        </div>
+      </div>
+      <div id="save-overwrite-warn" style="display:none;background:#FFF4E0;border:1px solid #FFE0A3;border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:700;color:#C77700;margin-bottom:4px;">⚠ 이미 저장된 데이터가 있습니다</div>
+        <div id="save-overwrite-detail" style="font-size:11px;color:#8E8E93;margin-bottom:10px;"></div>
+        <div style="font-size:11px;color:#3A3A3C;margin-bottom:6px;">실수 방지를 위해 아래 문구를 정확히 입력해야 저장할 수 있어요:</div>
+        <div style="font-size:13px;font-weight:800;color:#1C1C1E;margin-bottom:8px;" id="save-overwrite-label"></div>
+        <input class="mm-add-inp" id="save-confirm-text" style="width:100%;" placeholder="위 문구를 그대로 입력" oninput="onSaveConfirmTextInput()">
+      </div>
+    </div>
+    <div class="mm-footer">
+      <button class="mm-cancel" onclick="closeSaveModal()">취소</button>
+      <button class="mm-save" id="save-confirm-btn" onclick="doSave()">저장</button>
     </div>
   </div>
 </div>
@@ -419,29 +508,30 @@ async function gzipDecode(payload){
   return new TextDecoder().decode(out);
 }
 
-// 월별 업로드 데이터 저장 (파싱 데이터 압축)
-async function saveUpload(month,uploadType,fileName,data){
+// 월별 업로드 데이터 저장 (파싱 데이터 압축 + 저장 시점의 설정 스냅샷 동봉 → 과거 데이터 영구 보존용)
+async function saveUpload(month,uploadType,fileName,data,cfgSnapshot){
   const gz=await gzipEncode(JSON.stringify(data));
   await sb('sales_uploads?on_conflict=month,upload_type',{
     method:'POST',prefer:'resolution=merge-duplicates',
-    body:{month,upload_type:uploadType,file_name:fileName,raw_data_gz:gz,uploaded_at:new Date().toISOString()}
+    body:{month,upload_type:uploadType,file_name:fileName,raw_data_gz:gz,uploaded_at:new Date().toISOString(),config_snapshot:cfgSnapshot||null}
   });
 }
-// 월별 업로드 데이터 로드
+// 월별 업로드 데이터 로드 (저장 당시의 설정 스냅샷도 함께 복원)
 async function loadUploads(month){
   const rows=await sb(`sales_uploads?month=eq.${encodeURIComponent(month)}&select=*`);
   const result={first:null,second:null};
   if(rows){
     for(const r of rows){
       const data=JSON.parse(await gzipDecode(r.raw_data_gz));
-      const obj={fileName:r.file_name,date:new Date(r.uploaded_at).toLocaleString('ko-KR'),data};
+      const obj={fileName:r.file_name,date:new Date(r.uploaded_at).toLocaleString('ko-KR'),data,cfg:r.config_snapshot||null,saved:true};
       if(r.upload_type===1)result.first=obj;
       else if(r.upload_type===2)result.second=obj;
     }
   }
   return result;
 }
-// 월별 업로드 삭제 (특정 차수)
+// ⚠ 참고: 저장된 확정 데이터(1차/2차)는 회사 근간 자료라 삭제 기능을 두지 않습니다.
+// 아래 함수는 과거 호환을 위해 남겨두되, 어떤 UI에서도 호출하지 않습니다.
 async function deleteUpload(month,uploadType){
   await sb(`sales_uploads?month=eq.${encodeURIComponent(month)}&upload_type=eq.${uploadType}`,{method:'DELETE'});
 }
@@ -465,8 +555,50 @@ const DEFAULT_MANAGERS=[
   {raw_name:'박찬희',display_name:'박찬희 대리',sort_order:14},
   {raw_name:'박찬호',display_name:'박찬호 대리',sort_order:15},
 ];
-const TARGET_BRANDS=['Acrobiosystems','assaygenie','BIOWEST','Cusabio','Promocell','Alomone Labs','AVIVA System Biology ','CDI','cell guidance systems','cloud-clone','Excell bio','IPHASE Biosciences','Reliatech','IBSC','Muto','Prospec ','QEDbio ','reprocell (Stemgent,\nKoken, Reinnervate 포함)','St.John\u2019s Lab','Zytomed','Beckman coulter','CORNING','Merck','Neptune','Promega','Puredream','VoneTex','Zenoaq'];
 const EXCLUDE_LIST=['이나연','이은정','서재란','반품','취소','악성재고','폐기','최춘원'];
+
+// ===== 브랜드 설정 (Line/특판 + 핵심소계 + 숨김/순서 커스텀) =====
+// category: 'line'(해외직수입) | 'special'(국내유통/특판), is_core: 핵심소계 포함여부, sort_order: 그룹 내 순서, visible: 표시여부
+function DEFAULT_BRAND_SEED(){
+  const lineCore=['Acrobiosystems','assaygenie','BIOWEST','Cusabio','Promocell'];
+  const lineRest=['Alomone Labs','AVIVA System Biology ','CDI','cell guidance systems','cloud-clone','Excell bio','IPHASE Biosciences','Reliatech','IBSC','Muto','Prospec ','QEDbio ','reprocell (Stemgent,\nKoken, Reinnervate 포함)','St.John\u2019s Lab','Zytomed'];
+  const special=['Beckman coulter','CORNING','Merck','Neptune','Promega','Puredream','VoneTex','Zenoaq'];
+  const out=[];
+  lineCore.forEach((n,i)=>out.push({brand_name:n,category:'line',is_core:true,sort_order:i,visible:true}));
+  lineRest.forEach((n,i)=>out.push({brand_name:n,category:'line',is_core:false,sort_order:i,visible:true}));
+  special.forEach((n,i)=>out.push({brand_name:n,category:'special',is_core:false,sort_order:i,visible:true}));
+  return out;
+}
+let BRAND_CFG=[]; let tempBrands=[];
+async function loadBrandSettings(){
+  try{
+    let rows=await sb('brand_settings?order=category.asc,sort_order.asc');
+    if(!rows||!rows.length){
+      const seed=DEFAULT_BRAND_SEED();
+      await sb('brand_settings',{method:'POST',prefer:'resolution=merge-duplicates',body:seed});
+      rows=await sb('brand_settings?order=category.asc,sort_order.asc');
+    }
+    BRAND_CFG=rows||DEFAULT_BRAND_SEED();
+  }catch(e){ console.warn('브랜드 설정 로드 실패:',e); BRAND_CFG=DEFAULT_BRAND_SEED(); }
+}
+
+// ===== 담당자 이관 규칙 (퇴사자 매출/선발행을 다른 담당자에게 합산) =====
+// from_raw_name: 엑셀상 원본 이름, to_display_name: 받을 담당자 표시명, display_mode: 'merged'(섞어서) | 'separate'(구분표시)
+let MANAGER_TRANSFERS=[]; let tempTransfers=[];
+async function loadManagerTransfers(){
+  try{ MANAGER_TRANSFERS=await sb('manager_transfers?select=*')||[]; }
+  catch(e){ console.warn('이관 규칙 로드 실패:',e); MANAGER_TRANSFERS=[]; }
+}
+
+// 현재 시점의 '살아있는' 설정 스냅샷 (신규 업로드 미리보기에 사용, 저장 시 그대로 고정 보존됨)
+function buildLiveConfig(){
+  return {
+    managers:MANAGERS.slice(),
+    managerMap:Object.assign({},managerMap),
+    brands:BRAND_CFG.map(b=>Object.assign({},b)),
+    transfers:MANAGER_TRANSFERS.map(t=>Object.assign({},t))
+  };
+}
 
 let MANAGERS=[]; let managerMap={}; let tempManagers=[];
 async function loadManagers(){
@@ -507,11 +639,15 @@ function format(v,isRate=false){
 }
 function fmtWon(v){return Math.round(v).toLocaleString();}
 
-function process(data){
+function process(data,cfg){
+  cfg=cfg||buildLiveConfig();
+  const MGRS=cfg.managers,MMAP=cfg.managerMap,BRANDS=cfg.brands||[],TRANSFERS=cfg.transfers||[];
+  const transferByRaw={}; TRANSFERS.forEach(t=>{transferByRaw[t.from_raw_name]=t;});
+
   let matrix={};let mStats={};
-  MANAGERS.forEach(m=>{
-    mStats[m]={sales:0,pre:0,cost:0,ribeSales:0,ribeCost:0};
-    TARGET_BRANDS.forEach(b=>{if(!matrix[b])matrix[b]={};matrix[b][m]=0;});
+  MGRS.forEach(m=>{
+    mStats[m]={sales:0,pre:0,cost:0,ribeSales:0,ribeCost:0,transferIn:{}};
+    BRANDS.forEach(b=>{if(!matrix[b.brand_name])matrix[b.brand_name]={};matrix[b.brand_name][m]=0;});
   });
   let total={sales:0,pre:0,cost:0,ribeSales:0,ribeCost:0};
 
@@ -531,10 +667,20 @@ function process(data){
       if(ck==='품명분류'||ck==='분류')categoryRaw=String(row[key]||'').trim();
     }
     if(rowCostTotal===0&&cost!==0)rowCostTotal=cost*qty;
-    if(EXCLUDE_LIST.some(k=>managerRaw.includes(k)))return;
+
+    // 이관 규칙(퇴사자→담당자)이 걸리는 이름은 제외리스트보다 먼저 체크 (제외되지 않고 이관됨)
+    let transferRule=null;
+    for(let raw in transferByRaw){ if(raw&&managerRaw.includes(raw)){ transferRule=transferByRaw[raw]; break; } }
+    if(!transferRule && EXCLUDE_LIST.some(k=>managerRaw.includes(k)))return;
+
     let mName='';
-    for(let key in managerMap){if(managerRaw.includes(key)){mName=managerMap[key];break;}}
-    if(!mName&&(managerRaw.includes('업자')||managerRaw.includes('대리점')))mName='업자&대리점';
+    if(transferRule){
+      mName=transferRule.to_display_name;
+    }else{
+      for(let key in MMAP){if(managerRaw.includes(key)){mName=MMAP[key];break;}}
+      if(!mName&&(managerRaw.includes('업자')||managerRaw.includes('대리점')))mName='업자&대리점';
+    }
+
     total.sales+=amount;total.cost+=rowCostTotal;
     if(categoryRaw==='기타사입품'){total.ribeSales+=amount;total.ribeCost+=rowCostTotal;}
     if(itemCodeRaw.includes('선발행'))total.pre+=amount;
@@ -542,6 +688,10 @@ function process(data){
       mStats[mName].sales+=amount;mStats[mName].cost+=rowCostTotal;
       if(categoryRaw==='기타사입품'){mStats[mName].ribeSales+=amount;mStats[mName].ribeCost+=rowCostTotal;}
       if(itemCodeRaw.includes('선발행'))mStats[mName].pre+=amount;
+      if(transferRule){
+        const tin=mStats[mName].transferIn[transferRule.from_raw_name]||(mStats[mName].transferIn[transferRule.from_raw_name]={sales:0,pre:0,mode:transferRule.display_mode});
+        tin.sales+=amount; if(itemCodeRaw.includes('선발행'))tin.pre+=amount;
+      }
       let brand='';
       if(bRawRaw==='Merck Group')brand='Merck';
       else if(bRawRaw==='Excell bio')brand='Excell bio';
@@ -549,15 +699,17 @@ function process(data){
       else if(['stemgent','koken','reinnervate','reprocell'].some(k=>bRawRaw.toLowerCase().includes(k)))brand='reprocell (Stemgent,\nKoken, Reinnervate 포함)';
       else if(bRawRaw.toLowerCase().includes('corning')&&['재고사용','포천창고','corning'].some(x=>clientRaw.toLowerCase().includes(x)))brand='CORNING';
       else if(bRawRaw.toLowerCase().includes('beckman')&&['드림셀인스','재고사용'].some(x=>clientRaw.toLowerCase().includes(x)))brand='Beckman coulter';
-      else{for(let t of TARGET_BRANDS){if(t==='Merck')continue;if(t.trim().toLowerCase()===bRawRaw.toLowerCase()){brand=t;break;}}}
+      else{for(let t of BRANDS){if(t.brand_name==='Merck')continue;if(t.brand_name.trim().toLowerCase()===bRawRaw.toLowerCase()){brand=t.brand_name;break;}}}
       if(brand&&matrix[brand])matrix[brand][mName]+=amount;
     }
   });
-  render(matrix,mStats,total);
+  render(matrix,mStats,total,cfg);
   return mStats;
 }
 
-function render(matrix,mStats,total){
+function render(matrix,mStats,total,cfg){
+  cfg=cfg||buildLiveConfig();
+  const MGRS=cfg.managers,BRANDS=(cfg.brands||[]).filter(b=>b.visible!==false);
   const tbody=document.getElementById('table-body');
   const lineHeader=document.getElementById('line-header');
   const rowIds=['mgr-sales','mgr-pre','mgr-net','mgr-cost','mgr-profit','mgr-p-rate','mgr-ex-sales','mgr-ex-ribe-sales','mgr-ex-pre','mgr-ex-net','mgr-ex-cost','mgr-ex-ribe-cost','mgr-ex-profit','mgr-ex-p-rate','mgr-ex-m-rate','mgr-ex-target'];
@@ -572,11 +724,21 @@ function render(matrix,mStats,total){
   tc[1].innerText=format(total.sales);tc[2].innerText=format(tNet);tc[3].innerText=format(total.pre);
   tc[4].innerText=format(total.cost);tc[5].innerText=format(tProfit);tc[6].innerText=format(tNet?tProfit/tNet:0,true);
 
-  MANAGERS.forEach((m,idx)=>{
+  MGRS.forEach((m,idx)=>{
+    // 이관받은 내역이 있고 '구분표시'면 헤더에 작은 안내 표시
+    const s=mStats[m]||{sales:0,pre:0,cost:0,ribeSales:0,ribeCost:0,transferIn:{}};
+    let headerLabel=m;
+    const tins=Object.keys(s.transferIn||{});
+    if(tins.length){
+      const sepNames=tins.filter(k=>s.transferIn[k].mode==='separate');
+      if(sepNames.length){
+        const detail=sepNames.map(k=>`${k} 이관분 ${fmtWon(s.transferIn[k].sales)}원`).join(', ');
+        headerLabel=`${m}<div style="font-size:9px;font-weight:500;color:#0A6FD8;" title="${detail}">(+${sepNames.join(',')} 이관)</div>`;
+      }
+    }
     lineHeader.insertBefore(createCell(m,true),lineHeader.cells[lineHeader.cells.length-1]);
-    document.getElementById('mgr-header').insertBefore(createCell(m,true),document.getElementById('mgr-header').cells[idx+1]);
-    document.getElementById('mgr-ex-header').insertBefore(createCell(m,true),document.getElementById('mgr-ex-header').cells[idx+1]);
-    const s=mStats[m]||{sales:0,pre:0,cost:0,ribeSales:0,ribeCost:0};
+    document.getElementById('mgr-header').insertBefore(createCell(headerLabel,true),document.getElementById('mgr-header').cells[idx+1]);
+    document.getElementById('mgr-ex-header').insertBefore(createCell(headerLabel,true),document.getElementById('mgr-ex-header').cells[idx+1]);
     const net=s.sales-s.pre;const profit=net-s.cost;
     const exNet=net-s.ribeSales;const exProfit=profit-(s.ribeSales-s.ribeCost);
     const ins=(rowId,val,cls)=>{const el=document.getElementById(rowId);el.insertBefore(createCell(val,false,cls||''),el.cells[idx+1]);};
@@ -588,7 +750,7 @@ function render(matrix,mStats,total){
     ins('mgr-ex-m-rate',format(total.sales?s.sales/total.sales:0,'mRate'));ins('mgr-ex-target','');
   });
 
-  const li=MANAGERS.length+1;
+  const li=MGRS.length+1;
   const setL=(id,v)=>{document.getElementById(id).cells[li].innerText=v;};
   setL('mgr-sales',format(total.sales));setL('mgr-pre',format(total.pre));setL('mgr-net',format(tNet));
   setL('mgr-cost',format(total.cost));setL('mgr-profit',format(tProfit));setL('mgr-p-rate',format(tNet?tProfit/tNet:0,true));
@@ -598,24 +760,41 @@ function render(matrix,mStats,total){
   setL('mgr-ex-p-rate',format((tNet-total.ribeSales)?((tProfit-(total.ribeSales-total.ribeCost))/(tNet-total.ribeSales)):0,true));
   setL('mgr-ex-m-rate','100.00%');
 
-  let s1=Array(MANAGERS.length+1).fill(0);let cs=Array(MANAGERS.length+1).fill(0);let s2=Array(MANAGERS.length+1).fill(0);
-  TARGET_BRANDS.forEach((brand,idx)=>{
-    const tr=tbody.insertRow();tr.insertCell(0).innerText=brand;tr.cells[0].className='brand-col';
-    let rSum=0;
-    MANAGERS.forEach((m,mIdx)=>{
-      const v=(matrix[brand]&&matrix[brand][m])||0;
-      tr.insertCell(-1).className='num-cell';tr.cells[tr.cells.length-1].innerText=format(v);rSum+=v;
-      if(idx<=4)s1[mIdx]+=v;if(idx<=19)cs[mIdx]+=v;if(idx>=20)s2[mIdx]+=v;
-    });
-    tr.insertCell(-1).className='num-cell bg-blue';tr.cells[tr.cells.length-1].innerText=format(rSum);
-    s1[MANAGERS.length]+=(idx<=4?rSum:0);cs[MANAGERS.length]+=(idx<=19?rSum:0);s2[MANAGERS.length]+=(idx>=20?rSum:0);
-    if(idx===4)renderSubRow(tbody,s1,'소 계','bg-green subtotal-row');
-    if(idx===19)renderSubRow(tbody,cs,'합 계','bg-blue sum-row');
-    if(idx===27)renderSubRow(tbody,s2,'소 계','bg-green subtotal-row');
-  });
+  renderBrandTable(tbody,matrix,MGRS,BRANDS);
 
   document.getElementById('empty-state').style.display='none';
   document.getElementById('report-wrap').style.display='block';
+}
+
+// Line/특판 카테고리 + 카테고리별 독립 핵심소계 구조로 브랜드표 렌더링
+function renderBrandTable(tbody,matrix,MGRS,BRANDS){
+  const CAT_LABEL={line:'Line',special:'특판'};
+  ['line','special'].forEach(cat=>{
+    const brands=BRANDS.filter(b=>b.category===cat).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+    if(!brands.length)return;
+    const catTotal=Array(MGRS.length+1).fill(0);
+    const drawRow=(b,accum)=>{
+      const tr=tbody.insertRow();tr.insertCell(0).innerText=b.brand_name;tr.cells[0].className='brand-col';
+      let rSum=0;
+      MGRS.forEach((m,mIdx)=>{
+        const v=(matrix[b.brand_name]&&matrix[b.brand_name][m])||0;
+        tr.insertCell(-1).className='num-cell';tr.cells[tr.cells.length-1].innerText=format(v);
+        rSum+=v;accum[mIdx]+=v;catTotal[mIdx]+=v;
+      });
+      tr.insertCell(-1).className='num-cell bg-blue';tr.cells[tr.cells.length-1].innerText=format(rSum);
+      accum[MGRS.length]+=rSum;catTotal[MGRS.length]+=rSum;
+    };
+    const core=brands.filter(b=>b.is_core);
+    const rest=brands.filter(b=>!b.is_core);
+    if(core.length){
+      const coreTotal=Array(MGRS.length+1).fill(0);
+      core.forEach(b=>drawRow(b,coreTotal));
+      renderSubRow(tbody,coreTotal,`${CAT_LABEL[cat]} 핵심소계`,'bg-green subtotal-row');
+    }
+    const dummy=Array(MGRS.length+1).fill(0);
+    rest.forEach(b=>drawRow(b,dummy));
+    renderSubRow(tbody,catTotal,`${CAT_LABEL[cat]} 합계`,'bg-blue sum-row');
+  });
 }
 function createCell(text,isHeader=false,extraClass=''){
   const td=document.createElement('td');
@@ -772,6 +951,7 @@ function onDrop(e,type,el){
   processFile(type,f);
 }
 
+// 업로드 = 미리보기만. Supabase 자동저장 없음. 저장은 반드시 "저장" 버튼(saveModal) 통해서만 수행됨.
 function processFile(type,file){
   showToast('처리 중...',5000);
   const reader=new FileReader();
@@ -781,45 +961,83 @@ function processFile(type,file){
       const sheet=wb.Sheets[wb.SheetNames[0]];
       const data=XLSX.utils.sheet_to_json(sheet);
       const dateStr=new Date().toLocaleString('ko-KR');
+      const cfg=buildLiveConfig(); // 미리보기는 항상 '현재 살아있는' 최신 설정 기준
       if(type===1){
-        state.first={fileName:file.name,date:dateStr,data};
-        document.getElementById('uc1').className='ucard done-1';
-        document.getElementById('uc1-tag').innerHTML='✓ 1차 완료';
+        state.first={fileName:file.name,date:dateStr,data,cfg,saved:false,file};
+        document.getElementById('uc1').className='ucard preview-1';
+        document.getElementById('uc1-tag').innerHTML='◐ 1차 미리보기 (미저장)';
         document.getElementById('uc1-name').textContent=file.name;
         document.getElementById('uc1-date').textContent=dateStr;
         document.getElementById('uc2-name').textContent='2차 파일 업로드';
-        stats1Cache=process(data);
-        updateReportTitle('1차');
+        stats1Cache=process(data,cfg);
+        updateReportTitle('1차 (미저장 미리보기)');
         document.getElementById('change-section').style.display='none';
-        updateIsland('first');
       }else{
-        state.second={fileName:file.name,date:dateStr,data};
-        document.getElementById('uc2').className='ucard done-2';
-        document.getElementById('uc2-tag').innerHTML='✓ 2차 완료';
+        state.second={fileName:file.name,date:dateStr,data,cfg,saved:false,file};
+        document.getElementById('uc2').className='ucard preview-2';
+        document.getElementById('uc2-tag').innerHTML='◐ 2차 미리보기 (미저장)';
         document.getElementById('uc2-name').textContent=file.name;
         document.getElementById('uc2-date').textContent=dateStr;
-        const stats2=process(data);
-        updateReportTitle('2차');
+        const stats2=process(data,cfg);
+        updateReportTitle('2차 (미저장 미리보기)');
         changeData=computeChanges();
         const mgrDiff=computeMgrDiffFromStats(stats1Cache,stats2);
         renderChangeCards(mgrDiff);
         await loadReasons();
         renderChangeCards(mgrDiff);
-        updateIsland('second');
       }
-      showToast(`${type}차 업로드 완료 (${data.length}건) · 저장 중...`,4000);
-      // Supabase 저장 (파싱 데이터 압축 + 원본 엑셀)
-      try{
-        await saveUpload(currentMonth,type,file.name,data);
-        await sbUpload('sales-files',`${currentMonth}_${type}차_${file.name}`,file);
-        showToast(`${type}차 저장 완료 ✓`);
-      }catch(saveErr){
-        console.warn('저장 실패:',saveErr);
-        showToast(`${type}차 처리됨 (저장 실패 - 로컬에서만 열었을 수 있어요)`,4000);
-      }
+      showToast(`${type}차 미리보기 완료 (${data.length}건) · 저장하려면 카드의 '저장' 버튼을 눌러주세요`,4500);
+      updateSaveButtons();
     }catch(err){showToast('오류: '+err.message);console.error(err);}
   };
   reader.readAsArrayBuffer(file);
+}
+
+// 카드에 저장 버튼 노출 여부 갱신 (미저장 미리보기가 있을 때만 노출)
+function updateSaveButtons(){
+  document.getElementById('uc1-save').style.display = (state.first&&!state.first.saved)?'block':'none';
+  document.getElementById('uc2-save').style.display = (state.second&&!state.second.saved)?'block':'none';
+}
+
+// × 버튼: 저장 전(미리보기) 상태의 업로드 파일만 화면에서 뺀다. Supabase에는 절대 접근하지 않음.
+function clearPreview(type,e){
+  if(e){e.preventDefault();e.stopPropagation();}
+  if(type===1){
+    if(!state.first||state.first.saved)return; // 저장된 데이터는 이 버튼으로 안 지워짐
+    if(!confirm('1차 미리보기 파일을 뺄까요?\n(저장 전 상태라 화면에서만 사라지고, 저장된 데이터는 없으니 안심하세요)'))return;
+    state.first=null;stats1Cache=null;
+    document.getElementById('uc1').className='ucard';
+    document.getElementById('uc1-tag').textContent='1차 · 월초 업로드';
+    document.getElementById('uc1-name').textContent='파일 클릭 또는 드래그';
+    document.getElementById('uc1-date').textContent='수주 데이터 (.xlsx)';
+    if(state.second&&!state.second.saved){
+      state.second=null;
+      document.getElementById('uc2').className='ucard';
+      document.getElementById('uc2-tag').textContent='2차 · 월말 업로드';
+      document.getElementById('uc2-date').textContent='금액·발주단가 변동 자동 확인';
+    }
+    document.getElementById('uc2-name').textContent=state.second?state.second.fileName:'1차 업로드 후 가능';
+    document.getElementById('report-wrap').style.display='none';
+    document.getElementById('empty-state').style.display='flex';
+    document.getElementById('change-section').style.display='none';
+  }else{
+    if(!state.second||state.second.saved)return;
+    if(!confirm('2차 미리보기 파일을 뺄까요?\n(저장 전 상태라 화면에서만 사라지고, 저장된 데이터는 없으니 안심하세요)'))return;
+    state.second=null;
+    document.getElementById('uc2').className='ucard';
+    document.getElementById('uc2-tag').textContent='2차 · 월말 업로드';
+    document.getElementById('uc2-name').textContent='1차 업로드 후 가능';
+    document.getElementById('uc2-date').textContent='금액·발주단가 변동 자동 확인';
+    document.getElementById('change-section').style.display='none';
+    currentReportType=null;
+    document.getElementById('change-report').style.display='none';
+    if(state.first){
+      const cfg=state.first.cfg||buildLiveConfig();
+      stats1Cache=process(state.first.data,cfg);
+      updateReportTitle('1차');
+    }
+  }
+  updateSaveButtons();
 }
 
 function updateReportTitle(cycle){
@@ -1104,26 +1322,28 @@ async function restoreMonth(){
   catch(e){ console.warn('월 데이터 로드 실패:',e); updateIslandReset(); return; }
   if(!uploads.first&&!uploads.second){ updateIslandReset(); return; }
 
-  // 1차 복원
+  // 1차 복원 (저장 당시 설정 스냅샷 사용 — 없으면 현재 설정으로 대체(구버전 저장분 호환))
   if(uploads.first){
     state.first=uploads.first;
+    const cfg1=uploads.first.cfg||buildLiveConfig();
     document.getElementById('uc1').className='ucard done-1';
-    document.getElementById('uc1-tag').innerHTML='✓ 1차 완료';
+    document.getElementById('uc1-tag').innerHTML='✓ 1차 완료 (저장됨)';
     document.getElementById('uc1-name').textContent=uploads.first.fileName||'저장된 파일';
     document.getElementById('uc1-date').textContent=uploads.first.date||'';
     document.getElementById('uc2-name').textContent='2차 파일 업로드';
-    stats1Cache=process(uploads.first.data);
+    stats1Cache=process(uploads.first.data,cfg1);
     updateReportTitle('1차');
     updateIsland('first');
   }
-  // 2차 복원
+  // 2차 복원 (마찬가지로 저장 당시 스냅샷 사용, 없으면 1차 스냅샷, 그것도 없으면 현재 설정)
   if(uploads.second){
     state.second=uploads.second;
+    const cfg2=uploads.second.cfg||(uploads.first&&uploads.first.cfg)||buildLiveConfig();
     document.getElementById('uc2').className='ucard done-2';
-    document.getElementById('uc2-tag').innerHTML='✓ 2차 완료';
+    document.getElementById('uc2-tag').innerHTML='✓ 2차 완료 (저장됨)';
     document.getElementById('uc2-name').textContent=uploads.second.fileName||'저장된 파일';
     document.getElementById('uc2-date').textContent=uploads.second.date||'';
-    const stats2=process(uploads.second.data);
+    const stats2=process(uploads.second.data,cfg2);
     updateReportTitle('2차');
     if(state.first){
       changeData=computeChanges();
@@ -1133,6 +1353,7 @@ async function restoreMonth(){
       updateIsland('second');
     }
   }
+  updateSaveButtons();
 }
 function updateIslandStatus(txt){
   const inner=document.getElementById('island-inner');
@@ -1149,6 +1370,8 @@ function updateDial(){
   document.getElementById('mp-year').textContent=y;
   document.getElementById('mp-month').textContent=parseInt(m)+'월';
 }
+// 화면 초기화 전용. Supabase에는 절대 접근하지 않음 (저장된 확정 데이터는 그대로 안전).
+// "새로 생성" 버튼과 월 변경(dial) 시 공통으로 사용됨.
 function resetAll(){
   state={first:null,second:null};stats1Cache=null;
   changeData={changeEvents:[],unmatched:[],costChange:[]};
@@ -1169,13 +1392,42 @@ function resetAll(){
   const[y,m]=currentMonth.split('-');
   document.getElementById('island').className='island compact';
   document.getElementById('island-inner').innerHTML=`<div class="i-dot gray"></div><span class="i-month">${parseInt(m)}월 ${y}</span><span class="i-status">대기 중</span>`;
+  updateSaveButtons();
+}
+// "새로 생성" 버튼: 화면만 비우고(dial은 유지) 새 업로드를 시작할 수 있게 함. DB는 안 건드림.
+function startFresh(){
+  if(!confirm('화면을 비우고 새로 시작할까요?\n(이미 저장된 데이터는 안전하게 보존되며, 지금 화면의 미저장 미리보기만 사라집니다)'))return;
+  resetAll();
+  showToast('새로 시작합니다');
 }
 
+let activeSettingsTab='mgr';
 function openMgrModal(){
   tempManagers=Object.entries(managerMap).map(([raw,disp],i)=>({raw_name:raw,display_name:disp,sort_order:i}));
-  renderMgrList();document.getElementById('mgr-modal').classList.add('on');
+  tempBrands=JSON.parse(JSON.stringify(BRAND_CFG));
+  tempTransfers=JSON.parse(JSON.stringify(MANAGER_TRANSFERS));
+  renderMgrList();renderBrandLists();
+  const tfTo=document.getElementById('tf-to');
+  tfTo.innerHTML=MANAGERS.map(m=>`<option value="${m}">${m}</option>`).join('');
+  renderTransferList();
+  switchSettingsTab('mgr');
+  document.getElementById('mgr-modal').classList.add('on');
 }
 function closeMgrModal(){document.getElementById('mgr-modal').classList.remove('on');document.getElementById('mm-raw').value='';document.getElementById('mm-disp').value='';}
+function switchSettingsTab(tab){
+  activeSettingsTab=tab;
+  ['mgr','transfer','brand'].forEach(t=>{
+    document.getElementById('mm-tab-'+t).classList.toggle('on',t===tab);
+    document.getElementById('mm-panel-'+t).style.display=(t===tab)?'block':'none';
+  });
+}
+async function saveCurrentSettingsTab(){
+  if(activeSettingsTab==='mgr')await saveManagers();
+  else if(activeSettingsTab==='transfer')await saveTransfers();
+  else await saveBrands();
+}
+
+// ----- 담당자 -----
 function renderMgrList(){
   document.getElementById('mm-list').innerHTML=tempManagers.map((m,i)=>`
     <div class="mm-item"><span class="mm-order">${i+1}</span><span class="mm-raw">${m.raw_name}</span><span class="mm-disp">${m.display_name}</span><button class="mm-del" onclick="removeManager(${i})">삭제</button></div>`).join('');
@@ -1198,7 +1450,151 @@ async function saveManagers(){
   }catch(e){showToast('저장 실패: '+e.message);}
 }
 
-(async()=>{initMonthSelect();await loadManagers();await restoreMonth();})();
+// ----- 이관 규칙 -----
+function renderTransferList(){
+  const el=document.getElementById('tf-list');
+  if(!tempTransfers.length){el.innerHTML='<div style="font-size:12px;color:#8E8E93;padding:10px 2px;">등록된 이관 규칙이 없습니다</div>';return;}
+  el.innerHTML=tempTransfers.map((t,i)=>`
+    <div class="mm-item"><span class="mm-raw">${t.from_raw_name}</span><span style="color:#C7C7CC;">→</span><span class="mm-disp">${t.to_display_name}</span><span style="font-size:10px;color:#8E8E93;">${t.display_mode==='separate'?'(구분표시)':'(섞어서)'}</span><button class="mm-del" onclick="removeTransfer(${i})">삭제</button></div>`).join('');
+}
+function addTransfer(){
+  const from=document.getElementById('tf-from').value.trim();
+  const to=document.getElementById('tf-to').value;
+  const mode=document.getElementById('tf-mode').value;
+  if(!from||!to){showToast('퇴사자 이름과 받을 담당자를 모두 입력해주세요');return;}
+  if(tempTransfers.some(t=>t.from_raw_name===from)){showToast('이미 등록된 이름입니다');return;}
+  tempTransfers.push({from_raw_name:from,to_display_name:to,display_mode:mode});
+  document.getElementById('tf-from').value='';renderTransferList();
+}
+function removeTransfer(i){tempTransfers.splice(i,1);renderTransferList();}
+async function saveTransfers(){
+  try{
+    showToast('저장 중...',3000);
+    await sb('manager_transfers',{method:'DELETE'});
+    const body=tempTransfers.map(({id,...r})=>r);
+    if(body.length)await sb('manager_transfers',{method:'POST',prefer:'resolution=merge-duplicates',body});
+    MANAGER_TRANSFERS=JSON.parse(JSON.stringify(tempTransfers));closeMgrModal();showToast('이관 규칙이 저장되었습니다');
+  }catch(e){showToast('저장 실패: '+e.message);}
+}
+
+// ----- 브랜드 (Line/특판 + 핵심소계 + 숨김/순서) -----
+function renderBrandLists(){
+  const CAT_LABEL={line:'Line (해외직수입)',special:'특판 (국내유통)'};
+  ['line','special'].forEach(cat=>{
+    const el=document.getElementById('brand-list-'+cat);
+    const items=tempBrands.filter(b=>b.category===cat).sort((a,b)=>(a.is_core===b.is_core?0:(a.is_core?-1:1))||((a.sort_order||0)-(b.sort_order||0)));
+    let html=`<div style="font-size:11px;font-weight:800;color:#8E8E93;margin:10px 0 6px;">${CAT_LABEL[cat]}</div>`;
+    if(!items.length)html+='<div style="font-size:12px;color:#8E8E93;padding:4px 2px 10px;">등록된 브랜드가 없습니다</div>';
+    html+=items.map(b=>{
+      const idx=tempBrands.indexOf(b);
+      return `<div class="mm-item" style="${b.visible===false?'opacity:.45;':''}">
+        <span class="mm-disp" style="flex:1;">${b.brand_name}${b.is_core?' <span style="color:#0A6FD8;font-size:10px;">★핵심</span>':''}</span>
+        <button class="mm-del" style="background:#EEF6FF;color:#0A6FD8;" onclick="moveBrand(${idx},-1)">↑</button>
+        <button class="mm-del" style="background:#EEF6FF;color:#0A6FD8;" onclick="moveBrand(${idx},1)">↓</button>
+        <button class="mm-del" style="background:${b.is_core?'#FFF4E0':'#F2F2F7'};color:${b.is_core?'#C77700':'#3A3A3C'};" onclick="toggleBrandCore(${idx})">${b.is_core?'핵심해제':'핵심지정'}</button>
+        <button class="mm-del" onclick="toggleBrandVisible(${idx})">${b.visible===false?'다시보이기':'숨김'}</button>
+      </div>`;
+    }).join('');
+    el.innerHTML=html;
+  });
+}
+function moveBrand(idx,dir){
+  const b=tempBrands[idx];
+  const siblings=tempBrands.filter(x=>x.category===b.category&&x.is_core===b.is_core).sort((a,c)=>(a.sort_order||0)-(c.sort_order||0));
+  const pos=siblings.indexOf(b);const swapPos=pos+dir;
+  if(swapPos<0||swapPos>=siblings.length)return;
+  const other=siblings[swapPos];
+  const tmp=b.sort_order||0;b.sort_order=other.sort_order||0;other.sort_order=tmp;
+  renderBrandLists();
+}
+function toggleBrandCore(idx){tempBrands[idx].is_core=!tempBrands[idx].is_core;renderBrandLists();}
+function toggleBrandVisible(idx){tempBrands[idx].visible=(tempBrands[idx].visible===false)?true:false;renderBrandLists();}
+function addBrand(){
+  const cat=document.getElementById('brand-cat').value;
+  const name=document.getElementById('brand-name').value.trim();
+  const core=document.getElementById('brand-core').value==='1';
+  if(!name){showToast('브랜드명을 입력해주세요');return;}
+  if(tempBrands.some(b=>b.brand_name===name)){showToast('이미 존재하는 브랜드입니다');return;}
+  const orders=tempBrands.filter(b=>b.category===cat&&b.is_core===core).map(b=>b.sort_order||0);
+  const maxOrder=orders.length?Math.max(...orders):-1;
+  tempBrands.push({brand_name:name,category:cat,is_core:core,sort_order:maxOrder+1,visible:true});
+  document.getElementById('brand-name').value='';renderBrandLists();
+}
+async function saveBrands(){
+  try{
+    showToast('저장 중...',3000);
+    await sb('brand_settings',{method:'DELETE'});
+    const body=tempBrands.map(({id,...r})=>r);
+    if(body.length)await sb('brand_settings',{method:'POST',prefer:'resolution=merge-duplicates',body});
+    BRAND_CFG=JSON.parse(JSON.stringify(tempBrands));closeMgrModal();showToast('브랜드 설정이 저장되었습니다');
+  }catch(e){showToast('저장 실패: '+e.message);}
+}
+
+// ----- 저장 모달 (미리보기 → 실제 월/차수 확정 저장) -----
+let saveModalCtx=null;
+function openSaveModal(type,e){
+  if(e){e.preventDefault();e.stopPropagation();}
+  const src=type===1?state.first:state.second;
+  if(!src){showToast('저장할 미리보기가 없습니다');return;}
+  saveModalCtx={type,data:src.data,fileName:src.fileName,cfg:src.cfg||buildLiveConfig(),file:src.file};
+  const monthSel=document.getElementById('save-month');
+  monthSel.innerHTML=document.getElementById('month-sel').innerHTML;
+  monthSel.value=currentMonth;
+  document.querySelectorAll('input[name="save-cycle"]').forEach(r=>r.checked=(r.value==String(type)));
+  document.getElementById('save-modal').classList.add('on');
+  checkSaveOverwrite();
+}
+function closeSaveModal(){document.getElementById('save-modal').classList.remove('on');saveModalCtx=null;}
+async function checkSaveOverwrite(){
+  const month=document.getElementById('save-month').value;
+  const cycleInput=document.querySelector('input[name="save-cycle"]:checked');
+  const warn=document.getElementById('save-overwrite-warn');
+  const btn=document.getElementById('save-confirm-btn');
+  document.getElementById('save-confirm-text').value='';
+  if(!cycleInput){warn.style.display='none';btn.disabled=false;return;}
+  const cycle=parseInt(cycleInput.value);
+  try{
+    const rows=await sb(`sales_uploads?month=eq.${encodeURIComponent(month)}&upload_type=eq.${cycle}&select=id,file_name,uploaded_at`);
+    if(rows&&rows.length){
+      const[y,m]=month.split('-');
+      const label=`${parseInt(m)}월 ${cycle}차 변경`;
+      document.getElementById('save-overwrite-label').textContent=label;
+      document.getElementById('save-overwrite-detail').textContent=`기존 저장분: ${rows[0].file_name} (${new Date(rows[0].uploaded_at).toLocaleString('ko-KR')})`;
+      warn.style.display='block';btn.disabled=true;
+    }else{warn.style.display='none';btn.disabled=false;}
+  }catch(err){warn.style.display='none';btn.disabled=false;}
+}
+function onSaveConfirmTextInput(){
+  const label=document.getElementById('save-overwrite-label').textContent;
+  const val=document.getElementById('save-confirm-text').value.trim();
+  document.getElementById('save-confirm-btn').disabled=(val!==label);
+}
+async function doSave(){
+  if(!saveModalCtx)return;
+  const cycleInput=document.querySelector('input[name="save-cycle"]:checked');
+  if(!cycleInput){showToast('1차/2차를 선택해주세요');return;}
+  const month=document.getElementById('save-month').value;
+  const cycle=parseInt(cycleInput.value);
+  const btn=document.getElementById('save-confirm-btn');
+  btn.disabled=true;btn.textContent='저장 중...';
+  try{
+    await saveUpload(month,cycle,saveModalCtx.fileName,saveModalCtx.data,saveModalCtx.cfg);
+    if(saveModalCtx.file){
+      try{await sbUpload('sales-files',`${month}_${cycle}차_${saveModalCtx.fileName}`,saveModalCtx.file);}catch(e){console.warn('원본파일 업로드 실패',e);}
+    }
+    showToast(`${cycle}차 저장 완료 ✓`);
+    closeSaveModal();
+    document.getElementById('month-sel').value=month;
+    currentMonth=month;updateDial();
+    resetAll();
+    await restoreMonth();
+  }catch(err){
+    console.error(err);showToast('저장 실패: '+err.message);
+    btn.disabled=false;btn.textContent='저장';
+  }
+}
+
+(async()=>{initMonthSelect();await loadManagers();await loadBrandSettings();await loadManagerTransfers();await restoreMonth();})();
 </script>
 </body>
 </html>
