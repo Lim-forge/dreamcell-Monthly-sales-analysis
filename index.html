@@ -375,6 +375,7 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
       <button class="mm-tab on" id="mm-tab-mgr" onclick="switchSettingsTab('mgr')">담당자</button>
       <button class="mm-tab" id="mm-tab-transfer" onclick="switchSettingsTab('transfer')">이관규칙</button>
       <button class="mm-tab" id="mm-tab-brand" onclick="switchSettingsTab('brand')">브랜드</button>
+      <button class="mm-tab" id="mm-tab-admin" onclick="switchSettingsTab('admin')" style="color:#D70015;">관리자</button>
     </div>
     <div class="mm-body">
       <div id="mm-panel-mgr">
@@ -412,10 +413,23 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
         <div id="brand-list-line"></div>
         <div id="brand-list-special"></div>
       </div>
+      <div id="mm-panel-admin" style="display:none;">
+        <div style="background:#FFEBE9;border:1px solid #FFC7C2;border-radius:10px;padding:14px;margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:800;color:#D70015;margin-bottom:6px;">⚠ 월 단위 완전 삭제 (테스트/오저장 정리 전용)</div>
+          <div style="font-size:11px;color:#3A3A3C;line-height:1.6;margin-bottom:12px;">선택한 월의 1차·2차 저장 데이터를 전부 지웁니다. 되돌릴 수 없으니, 실제 확정된 회사 매출자료가 아니라 테스트/실수로 잘못 저장된 달에만 사용하세요.</div>
+          <div class="mm-add-col" style="margin-bottom:10px;"><span class="mm-add-lbl">삭제할 월</span>
+            <select class="mm-add-inp" id="admin-del-month" style="width:100%;"></select>
+          </div>
+          <div class="mm-add-col" style="margin-bottom:12px;"><span class="mm-add-lbl">관리자 암호</span>
+            <input type="password" class="mm-add-inp" id="admin-del-pw" style="width:100%;" placeholder="암호 입력">
+          </div>
+          <button class="mm-add-btn" style="width:100%;background:#D70015;" onclick="adminDeleteMonth()">이 월의 1차·2차 데이터 완전 삭제</button>
+        </div>
+      </div>
     </div>
-    <div class="mm-footer">
+    <div class="mm-footer" id="mm-footer">
       <button class="mm-cancel" onclick="closeMgrModal()">취소</button>
-      <button class="mm-save" onclick="saveCurrentSettingsTab()">저장</button>
+      <button class="mm-save" id="mm-save-footer-btn" onclick="saveCurrentSettingsTab()">저장</button>
     </div>
   </div>
 </div>
@@ -437,12 +451,23 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
           <label style="font-size:13px;display:flex;align-items:center;gap:5px;"><input type="radio" name="save-cycle" value="2" onchange="checkSaveOverwrite()">2차</label>
         </div>
       </div>
+      <div id="save-unmatch-warn" style="display:none;background:#FFEBE9;border:1px solid #FFC7C2;border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:700;color:#D70015;margin-bottom:6px;">⚠ 담당자 목록에 없는 수주자 이름이 있습니다</div>
+        <div id="save-unmatch-list" style="font-size:11px;color:#3A3A3C;line-height:1.7;margin-bottom:8px;"></div>
+        <div style="font-size:11px;color:#8E8E93;margin-bottom:8px;">이대로 저장하면 이 금액은 전체 총매출엔 포함되지만, 담당자별 표에는 어디에도 안 잡힙니다.</div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <button class="mm-cancel" style="flex:1;font-size:11px;padding:7px;" onclick="goAddManagerFromSave()">⚙️ 담당자 추가하러 가기</button>
+        </div>
+        <label style="font-size:11px;display:flex;align-items:center;gap:6px;color:#3A3A3C;">
+          <input type="checkbox" id="save-unmatch-ack" onchange="refreshSaveConfirmState()"> 확인했습니다, 이대로 저장할게요
+        </label>
+      </div>
       <div id="save-overwrite-warn" style="display:none;background:#FFF4E0;border:1px solid #FFE0A3;border-radius:10px;padding:12px 14px;margin-bottom:10px;">
         <div style="font-size:12px;font-weight:700;color:#C77700;margin-bottom:4px;">⚠ 이미 저장된 데이터가 있습니다</div>
         <div id="save-overwrite-detail" style="font-size:11px;color:#8E8E93;margin-bottom:10px;"></div>
         <div style="font-size:11px;color:#3A3A3C;margin-bottom:6px;">실수 방지를 위해 아래 문구를 정확히 입력해야 저장할 수 있어요:</div>
         <div style="font-size:13px;font-weight:800;color:#1C1C1E;margin-bottom:8px;" id="save-overwrite-label"></div>
-        <input class="mm-add-inp" id="save-confirm-text" style="width:100%;" placeholder="위 문구를 그대로 입력" oninput="onSaveConfirmTextInput()">
+        <input class="mm-add-inp" id="save-confirm-text" style="width:100%;" placeholder="위 문구를 그대로 입력" oninput="refreshSaveConfirmState()">
       </div>
     </div>
     <div class="mm-footer">
@@ -600,7 +625,7 @@ function buildLiveConfig(){
   };
 }
 
-let MANAGERS=[]; let managerMap={}; let tempManagers=[];
+let MANAGERS=[]; let managerMap={}; let tempManagers=[]; let ALL_MANAGER_ROWS=[];
 async function loadManagers(){
   try{
     const rows=await sb('manager_settings?order=sort_order.asc');
@@ -609,7 +634,9 @@ async function loadManagers(){
   }catch(e){ console.warn('담당자 로드 실패:',e); applyManagers(DEFAULT_MANAGERS); }
 }
 function applyManagers(rows){
-  MANAGERS=rows.map(r=>r.display_name);
+  ALL_MANAGER_ROWS=rows;
+  MANAGERS=rows.filter(r=>r.visible!==false).map(r=>r.display_name);
+  // managerMap은 숨김 여부와 상관없이 항상 전체를 유지 → ERP에 이름이 다시 찍혀도 매칭이 끊기지 않음
   managerMap={}; rows.forEach(r=>managerMap[r.raw_name]=r.display_name);
   if(!MANAGERS.includes('업자&대리점')) MANAGERS.push('업자&대리점');
 }
@@ -1403,7 +1430,7 @@ function startFresh(){
 
 let activeSettingsTab='mgr';
 function openMgrModal(){
-  tempManagers=Object.entries(managerMap).map(([raw,disp],i)=>({raw_name:raw,display_name:disp,sort_order:i}));
+  tempManagers=JSON.parse(JSON.stringify(ALL_MANAGER_ROWS));
   tempBrands=JSON.parse(JSON.stringify(BRAND_CFG));
   tempTransfers=JSON.parse(JSON.stringify(MANAGER_TRANSFERS));
   renderMgrList();renderBrandLists();
@@ -1416,31 +1443,60 @@ function openMgrModal(){
 function closeMgrModal(){document.getElementById('mgr-modal').classList.remove('on');document.getElementById('mm-raw').value='';document.getElementById('mm-disp').value='';}
 function switchSettingsTab(tab){
   activeSettingsTab=tab;
-  ['mgr','transfer','brand'].forEach(t=>{
+  ['mgr','transfer','brand','admin'].forEach(t=>{
     document.getElementById('mm-tab-'+t).classList.toggle('on',t===tab);
     document.getElementById('mm-panel-'+t).style.display=(t===tab)?'block':'none';
   });
+  document.getElementById('mm-footer').style.display=(tab==='admin')?'none':'flex';
+  if(tab==='admin'){
+    const sel=document.getElementById('admin-del-month');
+    sel.innerHTML=document.getElementById('month-sel').innerHTML;
+    document.getElementById('admin-del-pw').value='';
+  }
 }
 async function saveCurrentSettingsTab(){
   if(activeSettingsTab==='mgr')await saveManagers();
   else if(activeSettingsTab==='transfer')await saveTransfers();
-  else await saveBrands();
+  else if(activeSettingsTab==='brand')await saveBrands();
 }
 
-// ----- 담당자 -----
+// ----- 관리자: 월 단위 완전 삭제 (테스트/오저장 정리 전용, 암호 보호) -----
+const ADMIN_DELETE_PW='ap9813038';
+async function adminDeleteMonth(){
+  const month=document.getElementById('admin-del-month').value;
+  const pw=document.getElementById('admin-del-pw').value;
+  if(pw!==ADMIN_DELETE_PW){showToast('암호가 올바르지 않습니다');return;}
+  const[y,m]=month.split('-');
+  if(!confirm(`${y}년 ${parseInt(m)}월 저장 데이터(1차·2차)를 완전히 삭제할까요?\n\n⚠ 이 작업은 되돌릴 수 없습니다. 실제 확정된 회사 자료가 아닌 테스트/오저장 건에만 사용하세요.`))return;
+  try{
+    showToast('삭제 중...',3000);
+    await deleteUpload(month,1);
+    await deleteUpload(month,2);
+    showToast(`${y}년 ${parseInt(m)}월 데이터가 삭제되었습니다`);
+    document.getElementById('admin-del-pw').value='';
+    if(month===currentMonth){ closeMgrModal(); resetAll(); await restoreMonth(); }
+  }catch(e){showToast('삭제 실패: '+e.message);}
+}
+
+// ----- 담당자 (삭제 대신 숨김/다시보이기 — ERP에 이름이 다시 찍혀도 매칭 유지) -----
 function renderMgrList(){
   document.getElementById('mm-list').innerHTML=tempManagers.map((m,i)=>`
-    <div class="mm-item"><span class="mm-order">${i+1}</span><span class="mm-raw">${m.raw_name}</span><span class="mm-disp">${m.display_name}</span><button class="mm-del" onclick="removeManager(${i})">삭제</button></div>`).join('');
+    <div class="mm-item" style="${m.visible===false?'opacity:.45;':''}">
+      <span class="mm-order">${i+1}</span>
+      <span class="mm-raw">${m.raw_name}</span>
+      <span class="mm-disp">${m.display_name}${m.visible===false?' <span style="font-size:10px;color:#8E8E93;">(숨김)</span>':''}</span>
+      <button class="mm-del" onclick="toggleManagerVisible(${i})">${m.visible===false?'다시보이기':'숨김'}</button>
+    </div>`).join('');
 }
+function toggleManagerVisible(i){tempManagers[i].visible=(tempManagers[i].visible===false)?true:false;renderMgrList();}
 function addManager(){
   const raw=document.getElementById('mm-raw').value.trim();
   const disp=document.getElementById('mm-disp').value.trim();
   if(!raw||!disp){showToast('두 항목 모두 입력해주세요');return;}
   if(tempManagers.some(m=>m.raw_name===raw)){showToast('이미 존재하는 이름입니다');return;}
-  tempManagers.push({raw_name:raw,display_name:disp,sort_order:tempManagers.length});
+  tempManagers.push({raw_name:raw,display_name:disp,sort_order:tempManagers.length,visible:true});
   document.getElementById('mm-raw').value='';document.getElementById('mm-disp').value='';renderMgrList();
 }
-function removeManager(i){tempManagers.splice(i,1);tempManagers.forEach((m,idx)=>m.sort_order=idx);renderMgrList();}
 async function saveManagers(){
   try{
     showToast('저장 중...',3000);
@@ -1542,16 +1598,58 @@ function openSaveModal(type,e){
   monthSel.value=currentMonth;
   document.querySelectorAll('input[name="save-cycle"]').forEach(r=>r.checked=(r.value==String(type)));
   document.getElementById('save-modal').classList.add('on');
+  checkUnmatchedManagers();
   checkSaveOverwrite();
 }
 function closeSaveModal(){document.getElementById('save-modal').classList.remove('on');saveModalCtx=null;}
+
+// 담당자 목록(managerMap)에 매칭되지 않는 원본 수주자 이름을 찾아 경고
+function checkUnmatchedManagers(){
+  if(!saveModalCtx)return;
+  const cfg=saveModalCtx.cfg;
+  const mmap=cfg.managerMap||{};
+  const transferFrom=(cfg.transfers||[]).map(t=>t.from_raw_name).filter(Boolean);
+  const agg={};
+  saveModalCtx.data.forEach(row=>{
+    let managerRaw='',amount=0;
+    for(let key in row){
+      const ck=String(key).replace(/\s+/g,'');
+      if(ck==='수주자'||ck==='담당자')managerRaw=String(row[key]||'').trim();
+      if(ck==='수주합계'||ck==='수주금액'||ck==='매출액')amount=safeParse(row[key]);
+    }
+    if(!managerRaw)return;
+    if(EXCLUDE_LIST.some(k=>managerRaw.includes(k)))return;
+    if(transferFrom.some(k=>managerRaw.includes(k)))return;
+    let matched=false;
+    for(let key in mmap){if(managerRaw.includes(key)){matched=true;break;}}
+    if(!matched&&(managerRaw.includes('업자')||managerRaw.includes('대리점')))matched=true;
+    if(!matched){
+      if(!agg[managerRaw])agg[managerRaw]={amount:0,count:0};
+      agg[managerRaw].amount+=amount;agg[managerRaw].count+=1;
+    }
+  });
+  const list=Object.entries(agg).map(([name,v])=>({name,...v}));
+  const warn=document.getElementById('save-unmatch-warn');
+  if(list.length){
+    document.getElementById('save-unmatch-list').innerHTML=list.map(u=>`· <b>${u.name}</b> — ${u.count}건, ${fmtWon(u.amount)}원`).join('<br>');
+    document.getElementById('save-unmatch-ack').checked=false;
+    warn.style.display='block';
+  }else{
+    warn.style.display='none';
+  }
+  refreshSaveConfirmState();
+}
+function goAddManagerFromSave(){
+  closeSaveModal();
+  openMgrModal();
+  showToast('담당자를 추가한 뒤, 다시 저장을 눌러주세요');
+}
 async function checkSaveOverwrite(){
   const month=document.getElementById('save-month').value;
   const cycleInput=document.querySelector('input[name="save-cycle"]:checked');
   const warn=document.getElementById('save-overwrite-warn');
-  const btn=document.getElementById('save-confirm-btn');
   document.getElementById('save-confirm-text').value='';
-  if(!cycleInput){warn.style.display='none';btn.disabled=false;return;}
+  if(!cycleInput){warn.style.display='none';refreshSaveConfirmState();return;}
   const cycle=parseInt(cycleInput.value);
   try{
     const rows=await sb(`sales_uploads?month=eq.${encodeURIComponent(month)}&upload_type=eq.${cycle}&select=id,file_name,uploaded_at`);
@@ -1560,14 +1658,20 @@ async function checkSaveOverwrite(){
       const label=`${parseInt(m)}월 ${cycle}차 변경`;
       document.getElementById('save-overwrite-label').textContent=label;
       document.getElementById('save-overwrite-detail').textContent=`기존 저장분: ${rows[0].file_name} (${new Date(rows[0].uploaded_at).toLocaleString('ko-KR')})`;
-      warn.style.display='block';btn.disabled=true;
-    }else{warn.style.display='none';btn.disabled=false;}
-  }catch(err){warn.style.display='none';btn.disabled=false;}
+      warn.style.display='block';
+    }else{warn.style.display='none';}
+  }catch(err){warn.style.display='none';}
+  refreshSaveConfirmState();
 }
-function onSaveConfirmTextInput(){
+// 저장버튼 활성화 조건: (미매칭 경고 없거나 체크박스 확인됨) AND (덮어쓰기 경고 없거나 문구 정확히 입력됨)
+function refreshSaveConfirmState(){
+  const unmatchWarnOn=document.getElementById('save-unmatch-warn').style.display==='block';
+  const unmatchOk=!unmatchWarnOn||document.getElementById('save-unmatch-ack').checked;
+  const overwriteWarnOn=document.getElementById('save-overwrite-warn').style.display==='block';
   const label=document.getElementById('save-overwrite-label').textContent;
   const val=document.getElementById('save-confirm-text').value.trim();
-  document.getElementById('save-confirm-btn').disabled=(val!==label);
+  const overwriteOk=!overwriteWarnOn||(val===label);
+  document.getElementById('save-confirm-btn').disabled=!(unmatchOk&&overwriteOk);
 }
 async function doSave(){
   if(!saveModalCtx)return;
