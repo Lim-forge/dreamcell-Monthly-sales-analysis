@@ -12,9 +12,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;bac
 .top-zone{background:#F2F2F7;padding:16px 20px 12px;position:sticky;top:0;z-index:50;}
 .island-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:14px;}
 .im-upload-row{display:flex;gap:8px;}
-.im-upload-btn{padding:6px 14px;border-radius:14px;border:none;background:#00796B;color:#fff;font-size:11.5px;font-weight:700;cursor:pointer;transition:all .15s;}
-.im-upload-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,121,107,.35);}
+.im-upload-btn{padding:5px 12px;border-radius:14px;border:none;color:#fff;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;}
+.im-upload-btn-1{background:#2e9e6e;}
+.im-upload-btn-1:hover:not(:disabled){box-shadow:0 4px 12px rgba(46,158,110,.35);}
+.im-upload-btn-2{background:#4a7fc1;}
+.im-upload-btn-2:hover:not(:disabled){box-shadow:0 4px 12px rgba(74,127,193,.35);}
+.im-upload-btn:hover:not(:disabled){transform:translateY(-1px);}
 .im-upload-btn:disabled{opacity:.5;cursor:not-allowed;}
+.uc-col{display:flex;flex-direction:column;gap:5px;flex:1;}
+.uc-col .im-upload-btn{align-self:center;}
 .island{background:#000;border-radius:24px;transition:all .4s cubic-bezier(.34,1.2,.4,1);overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.18);}
 .island.compact{padding:9px 20px;}
 .island.result{padding:11px 22px;}
@@ -35,18 +41,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;bac
 .mp-select{border:none;background:transparent;font-size:10px;color:#0A84FF;cursor:pointer;text-align:center;font-weight:600;}
 
 .upload-cards{display:flex;gap:10px;flex:1;}
-.ucard{position:relative;flex:1;background:#fff;border:2px dashed #D1D1D6;border-radius:16px;padding:14px 16px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.ucard{position:relative;flex:1;background:#fff;border:2px dashed #D1D1D6;border-radius:16px;padding:10px 14px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.04);}
 .ucard:hover{border-color:#0A84FF;}
 .ucard.done-1{border-style:solid;border-color:#30D158;background:#F1FBF3;}
 .ucard.done-2{border-style:solid;border-color:#0A84FF;background:#EEF6FF;}
 .ucard.preview-1,.ucard.preview-2{border-style:solid;border-color:#FF9F0A;background:#FFF8EF;}
 .ucard.drag-over{border-color:#FF9F0A;background:#FFF8EF;transform:scale(1.01);}
-.uc-tag{font-size:10px;font-weight:700;letter-spacing:.05em;color:#8E8E93;margin-bottom:4px;}
+.uc-tag{font-size:9px;font-weight:700;letter-spacing:.05em;color:#8E8E93;margin-bottom:2px;}
 .ucard.done-1 .uc-tag{color:#248A3D;}
 .ucard.done-2 .uc-tag{color:#0A6FD8;}
 .ucard.preview-1 .uc-tag,.ucard.preview-2 .uc-tag{color:#C77700;}
-.uc-name{font-size:13px;font-weight:600;color:#1C1C1E;}
-.uc-date{font-size:11px;color:#8E8E93;margin-top:2px;}
+.uc-name{font-size:12px;font-weight:600;color:#1C1C1E;}
+.uc-date{font-size:10px;color:#8E8E93;margin-top:1px;}
 .uc-actions{display:none;position:absolute;top:8px;right:8px;gap:6px;}
 .ucard.preview-1 .uc-actions,.ucard.preview-2 .uc-actions{display:flex;}
 .uc-del{width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,.08);color:#8E8E93;font-size:13px;line-height:22px;text-align:center;cursor:pointer;padding:0;}
@@ -54,7 +60,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;bac
 .uc-save{padding:0 10px;height:22px;border-radius:11px;border:none;background:#1C1C1E;color:#fff;font-size:11px;font-weight:700;cursor:pointer;}
 .uc-save:hover{background:#0A84FF;}
 input[type=file]{display:none;}
-.fresh-btn{background:#fff;border:1px solid #E5E5EA;border-radius:16px;padding:0 16px;font-size:12px;font-weight:700;color:#3A3A3C;cursor:pointer;flex-shrink:0;}
+.fresh-btn{background:#fff;border:1.5px dashed #D1D1D6;border-radius:16px;padding:0 18px;font-size:12px;font-weight:700;color:#6E6E73;cursor:pointer;flex-shrink:0;width:88px;display:flex;align-items:center;justify-content:center;text-align:center;transition:all .15s;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.fresh-btn:hover{border-color:#0A84FF;color:#0A84FF;background:#F5FAFF;}
 .fresh-btn:hover{background:#F2F2F7;}
 
 .body-zone{padding:4px 20px 40px;}
@@ -68,10 +75,12 @@ input[type=file]{display:none;}
 .chcard:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.08);}
 .chcard.amt{border-color:#FFE5B4;}
 .chcard.cost{border-color:#FFD4CC;}
+.chcard.manual{border-color:#D6D0FA;}
 .chcard-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .chcard-icon{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;}
 .chcard.amt .chcard-icon{background:#FFF4E0;}
 .chcard.cost .chcard-icon{background:#FFEEEA;}
+.chcard.manual .chcard-icon{background:#F0EDFC;}
 .chcard-arrow{font-size:18px;color:#C7C7CC;}
 .chcard-count{font-size:24px;font-weight:800;color:#1C1C1E;line-height:1;}
 .chcard-count .unit{font-size:14px;font-weight:600;color:#8E8E93;margin-left:2px;}
@@ -79,14 +88,16 @@ input[type=file]{display:none;}
 .chcard-sub{font-size:11px;margin-top:6px;font-weight:600;}
 .chcard.amt .chcard-sub{color:#C77700;}
 .chcard.cost .chcard-sub{color:#C7362B;}
+.chcard.manual .chcard-sub{color:#7C6FE0;}
 .chcard-sub.empty{color:#30D158!important;}
 
 /* 인라인 변동 리포트 */
 .chcard.active{border-width:2px;}
 .chcard.amt.active{border-color:#FF9F0A;}
 .chcard.cost.active{border-color:#FF6B52;}
-#arrow-amt,#arrow-cost{transition:transform .2s;}
-.chcard.active #arrow-amt,.chcard.active #arrow-cost{transform:rotate(90deg);}
+.chcard.manual.active{border-color:#7C6FE0;}
+#arrow-amt,#arrow-cost,#arrow-manual{transition:transform .2s;}
+.chcard.active #arrow-amt,.chcard.active #arrow-cost,.chcard.active #arrow-manual{transform:rotate(90deg);}
 .change-report{background:#fff;border-radius:16px;margin:14px 0;box-shadow:0 1px 3px rgba(0,0,0,.05);overflow:hidden;}
 .cr-header{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:0.5px solid #E5E5EA;flex-wrap:wrap;}
 .cr-title{font-size:15px;font-weight:800;color:#1C1C1E;}
@@ -123,6 +134,13 @@ input[type=file]{display:none;}
 .cr-reason-input.cr-locked{background:#F9F9FB;color:#8E8E93;border-color:#F2F2F7;}
 .cr-reason-input:focus{outline:none;border-color:#0A84FF;}
 .cr-empty{text-align:center;padding:36px;color:#8E8E93;}
+.manual-form{display:flex;flex-wrap:wrap;gap:6px;padding:12px 20px;background:#F9F8FF;border-bottom:1px solid #EDEBFB;}
+.manual-inp{padding:6px 8px;border:1px solid #E0DDF5;border-radius:8px;font-size:11.5px;font-family:inherit;}
+.manual-inp:focus{outline:none;border-color:#7C6FE0;}
+.manual-add-btn{padding:6px 14px;border:none;border-radius:8px;background:#7C6FE0;color:#fff;font-size:11.5px;font-weight:700;cursor:pointer;}
+.manual-add-btn:hover{background:#6a5cd4;}
+.manual-del-btn{border:none;background:none;cursor:pointer;font-size:13px;opacity:.6;}
+.manual-del-btn:hover{opacity:1;}
 .cr-empty-icon{font-size:32px;margin-bottom:8px;}
 
 .mgr-diff-card{background:#fff;border-radius:16px;padding:16px 18px;margin:14px 0;box-shadow:0 1px 3px rgba(0,0,0,.05);}
@@ -210,10 +228,6 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
         <span class="i-status">대기 중</span>
       </div>
     </div>
-    <div class="im-upload-row">
-      <button class="im-upload-btn" id="btn-upload-first" onclick="uploadFirstToIM()" title="1차 데이터를 이슈모니터에 그대로 업로드">📤 1차 업로드</button>
-      <button class="im-upload-btn" id="btn-upload-second" onclick="uploadSecondToIM()" title="2차 데이터로 이슈모니터 데이터를 완전히 교체">📤 2차 업로드</button>
-    </div>
   </div>
 
   <div class="control-row">
@@ -228,29 +242,35 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
     </div>
 
     <div class="upload-cards">
-      <div class="ucard" id="uc1"
-        onclick="document.getElementById('f1').click()"
-        ondragover="onDragOver(event,this)" ondragleave="onDragLeave(this)" ondrop="onDrop(event,1,this)">
-        <div class="uc-actions">
-          <button class="uc-save" id="uc1-save" style="display:none;" onclick="openSaveModal(1,event)">저장</button>
-          <button class="uc-del" onclick="clearPreview(1,event)" title="미리보기 빼기">×</button>
+      <div class="uc-col">
+        <button class="im-upload-btn im-upload-btn-1" id="btn-upload-first" onclick="uploadFirstToIM()" title="1차 데이터를 이슈모니터에 그대로 업로드">📌 1차 업로드</button>
+        <div class="ucard" id="uc1"
+          onclick="document.getElementById('f1').click()"
+          ondragover="onDragOver(event,this)" ondragleave="onDragLeave(this)" ondrop="onDrop(event,1,this)">
+          <div class="uc-actions">
+            <button class="uc-save" id="uc1-save" style="display:none;" onclick="openSaveModal(1,event)">저장</button>
+            <button class="uc-del" onclick="clearPreview(1,event)" title="미리보기 빼기">×</button>
+          </div>
+          <div class="uc-tag" id="uc1-tag">1차 · 월초 업로드</div>
+          <div class="uc-name" id="uc1-name">파일 클릭 또는 드래그</div>
+          <div class="uc-date" id="uc1-date">수주 데이터 (.xlsx)</div>
         </div>
-        <div class="uc-tag" id="uc1-tag">1차 · 월초 업로드</div>
-        <div class="uc-name" id="uc1-name">파일 클릭 또는 드래그</div>
-        <div class="uc-date" id="uc1-date">수주 데이터 (.xlsx)</div>
       </div>
       <input type="file" id="f1" accept=".xlsx,.xls" onchange="handleFile(1,this)">
 
-      <div class="ucard" id="uc2"
-        onclick="if(state.first)document.getElementById('f2').click();else showToast('1차 파일을 먼저 업로드하세요')"
-        ondragover="onDragOver(event,this)" ondragleave="onDragLeave(this)" ondrop="onDrop(event,2,this)">
-        <div class="uc-actions">
-          <button class="uc-save" id="uc2-save" style="display:none;" onclick="openSaveModal(2,event)">저장</button>
-          <button class="uc-del" onclick="clearPreview(2,event)" title="미리보기 빼기">×</button>
+      <div class="uc-col">
+        <button class="im-upload-btn im-upload-btn-2" id="btn-upload-second" onclick="uploadSecondToIM()" title="2차 데이터로 이슈모니터 데이터를 완전히 교체">🔄 2차 업로드</button>
+        <div class="ucard" id="uc2"
+          onclick="if(state.first)document.getElementById('f2').click();else showToast('1차 파일을 먼저 업로드하세요')"
+          ondragover="onDragOver(event,this)" ondragleave="onDragLeave(this)" ondrop="onDrop(event,2,this)">
+          <div class="uc-actions">
+            <button class="uc-save" id="uc2-save" style="display:none;" onclick="openSaveModal(2,event)">저장</button>
+            <button class="uc-del" onclick="clearPreview(2,event)" title="미리보기 빼기">×</button>
+          </div>
+          <div class="uc-tag" id="uc2-tag">2차 · 월말 업로드</div>
+          <div class="uc-name" id="uc2-name">1차 업로드 후 가능</div>
+          <div class="uc-date" id="uc2-date">금액·발주단가 변동 자동 확인</div>
         </div>
-        <div class="uc-tag" id="uc2-tag">2차 · 월말 업로드</div>
-        <div class="uc-name" id="uc2-name">1차 업로드 후 가능</div>
-        <div class="uc-date" id="uc2-date">금액·발주단가 변동 자동 확인</div>
       </div>
       <input type="file" id="f2" accept=".xlsx,.xls" onchange="handleFile(2,this)">
     </div>
@@ -279,6 +299,12 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
         <div class="chcard-count"><span id="cost-count">0</span><span class="unit">건</span></div>
         <div class="chcard-label">발주단가 변동 (10만↑)</div>
         <div class="chcard-sub" id="cost-sub"></div>
+      </div>
+      <div class="chcard manual" id="chcard-manual" onclick="toggleChangeReport('manual')">
+        <div class="chcard-top"><div class="chcard-icon">📝</div><div class="chcard-arrow" id="arrow-manual">›</div></div>
+        <div class="chcard-count"><span id="manual-count">0</span><span class="unit">건</span></div>
+        <div class="chcard-label">변동건 수기 입력</div>
+        <div class="chcard-sub" id="manual-sub">전체 누적 (월 무관)</div>
       </div>
     </div>
 
@@ -1119,6 +1145,7 @@ function renderChangeCards(mgrDiff){
     document.getElementById('mgr-diff-list').innerHTML=mgrDiff.map(d=>`
       <div class="mdc-row"><span class="mdc-name">${d.manager}</span><span class="mdc-val ${d.diff>=0?'up':'down'}">${d.diff>=0?'+':''}${fmtWon(d.diff)}원</span></div>`).join('');
   }else{mdCard.style.display='none';}
+  refreshManualCount();
 }
 
 let currentReportType=null;
@@ -1128,14 +1155,22 @@ function toggleChangeReport(type){
   currentReportType=type;
   document.getElementById('chcard-amt').classList.toggle('active',type==='amt');
   document.getElementById('chcard-cost').classList.toggle('active',type==='cost');
+  document.getElementById('chcard-manual').classList.toggle('active',type==='manual');
   const report=document.getElementById('change-report');
   report.style.display='block';
   if(type==='amt'){
     document.getElementById('cr-title').textContent='수주 변동 상세 (반품·취소·수량·금액)';
+    document.getElementById('cr-save-btn').style.display='inline-block';
     renderEventReport();
-  }else{
+  }else if(type==='cost'){
     document.getElementById('cr-title').textContent='발주단가 변동 상세 (10만원↑)';
+    document.getElementById('cr-save-btn').style.display='inline-block';
     renderCostReport();
+  }else{
+    document.getElementById('cr-title').textContent='변동건 수기 입력 (월 무관, 전체 누적)';
+    document.getElementById('cr-save-btn').style.display='none';
+    document.getElementById('cr-edit-btn').style.display='none';
+    renderManualReport();
   }
   report.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
@@ -1144,6 +1179,7 @@ function closeChangeReport(){
   document.getElementById('change-report').style.display='none';
   document.getElementById('chcard-amt').classList.remove('active');
   document.getElementById('chcard-cost').classList.remove('active');
+  document.getElementById('chcard-manual').classList.remove('active');
 }
 
 function renderEventReport(){
@@ -1160,6 +1196,85 @@ function renderCostReport(){
   document.getElementById('cr-save-btn').style.display='inline-block';
   body.innerHTML=costTableHtml(changeData.costChange);
   applyReasonLockState();
+}
+
+// ── 변동건 수기 입력 (월 무관, 전체 누적 — 월매출연산기 자체 DB에만 저장, 이슈모니터 업로드 대상 아님) ──
+const MANUAL_TYPE_OPTS=['완전취소','수량변경','금액변경','반품·취소처리','기타'];
+async function refreshManualCount(){
+  try{
+    const rows=await sb('manual_change_log?select=id');
+    const cnt=(rows||[]).length;
+    document.getElementById('manual-count').textContent=cnt;
+  }catch(e){console.warn('수기입력 건수 조회 실패:',e);}
+}
+async function renderManualReport(){
+  const body=document.getElementById('cr-body');
+  body.innerHTML='<div class="cr-empty">불러오는 중...</div>';
+  try{
+    const rows=await sb('manual_change_log?order=created_at.desc&limit=500')||[];
+    document.getElementById('manual-count').textContent=rows.length;
+    body.innerHTML=manualFormHtml()+manualLogTableHtml(rows);
+  }catch(e){
+    body.innerHTML=emptyMsg('불러오기 실패: '+e.message);
+  }
+}
+function manualFormHtml(){
+  const typeOpts=MANUAL_TYPE_OPTS.map(t=>`<option value="${t}">${t}</option>`).join('');
+  return `<div class="manual-form">
+    <select class="manual-inp" id="mf-type" style="width:110px;">${typeOpts}</select>
+    <input class="manual-inp" id="mf-manager" placeholder="담당자" style="width:90px;">
+    <input class="manual-inp" id="mf-date" type="date" style="width:130px;">
+    <input class="manual-inp" id="mf-code" placeholder="품명코드" style="width:100px;">
+    <input class="manual-inp" id="mf-name" placeholder="품명" style="width:150px;">
+    <input class="manual-inp" id="mf-qty" type="number" placeholder="수량" style="width:70px;">
+    <input class="manual-inp" id="mf-orig" type="number" placeholder="원수주금액" style="width:110px;">
+    <input class="manual-inp" id="mf-changed" type="number" placeholder="변동수주금액" style="width:110px;">
+    <input class="manual-inp" id="mf-reason" placeholder="사유" style="width:160px;">
+    <button class="manual-add-btn" onclick="addManualRow()">+ 추가</button>
+  </div>`;
+}
+function manualLogTableHtml(rows){
+  if(!rows.length)return '<div class="cr-empty" style="margin-top:12px;">아직 입력된 내역이 없습니다</div>';
+  const trs=rows.map(r=>{
+    const diff=(r.changed_amount!=null&&r.original_amount!=null)?(r.changed_amount-r.original_amount):null;
+    return `<tr>
+      <td>${typeBadges([r.change_type||''])}</td>
+      <td>${r.manager||''}</td>
+      <td>${r.order_date||''}</td>
+      <td>${r.item_code||''}</td>
+      <td><div class="cr-item-name" title="${r.item_name||''}">${r.item_name||''}</div></td>
+      <td class="right">${r.qty??''}</td>
+      <td class="right">${r.original_amount!=null?fmtWon(r.original_amount):''}</td>
+      <td class="right">${r.changed_amount!=null?fmtWon(r.changed_amount):''}${diff!=null?` <span class="${diff<0?'cr-down':'cr-up'}">(${diff>=0?'+':''}${fmtWon(diff)})</span>`:''}</td>
+      <td class="right">${r.reason||''}</td>
+      <td class="right"><button class="manual-del-btn" onclick="deleteManualRow(${r.id})" title="삭제">🗑</button></td>
+    </tr>`;
+  }).join('');
+  return `<table class="cr-table" style="margin-top:14px;"><thead><tr>
+    <th>변동유형</th><th>담당자</th><th>수주일</th><th>품명코드</th><th>품명</th><th class="right">수량</th><th class="right">원수주금액</th><th class="right">변동수주금액</th><th class="right">사유</th><th class="right">삭제</th>
+  </tr></thead><tbody>${trs}</tbody></table>`;
+}
+async function addManualRow(){
+  const v=id=>document.getElementById(id).value.trim();
+  const type=v('mf-type'), manager=v('mf-manager'), date=v('mf-date'), code=v('mf-code'), name=v('mf-name');
+  const qty=v('mf-qty'), orig=v('mf-orig'), changed=v('mf-changed'), reason=v('mf-reason');
+  if(!name){showToast('품명을 입력해주세요');return;}
+  try{
+    await sb('manual_change_log',{method:'POST',prefer:'return=minimal',body:[{
+      change_type:type, manager, order_date:date||null, item_code:code, item_name:name,
+      qty:qty?Number(qty):null, original_amount:orig?Number(orig):null, changed_amount:changed?Number(changed):null,
+      reason,
+    }]});
+    showToast('✅ 수기 입력 저장됨');
+    renderManualReport();
+  }catch(e){showToast('저장 실패: '+e.message);}
+}
+async function deleteManualRow(id){
+  if(!confirm('이 항목을 삭제할까요?'))return;
+  try{
+    await sb(`manual_change_log?id=eq.${id}`,{method:'DELETE'});
+    renderManualReport();
+  }catch(e){showToast('삭제 실패: '+e.message);}
 }
 // 저장된 사유가 하나라도 있으면 잠금 상태로 시작 (수정 버튼 노출)
 function applyReasonLockState(){
@@ -1586,6 +1701,7 @@ function resetAll(){
   document.getElementById('change-report').style.display='none';
   document.getElementById('chcard-amt').classList.remove('active');
   document.getElementById('chcard-cost').classList.remove('active');
+  document.getElementById('chcard-manual').classList.remove('active');
   const[y,m]=currentMonth.split('-');
   document.getElementById('island').className='island compact';
   document.getElementById('island-inner').innerHTML=`<div class="i-dot gray"></div><span class="i-month">${parseInt(m)}월 ${y}</span><span class="i-status">대기 중</span>`;
