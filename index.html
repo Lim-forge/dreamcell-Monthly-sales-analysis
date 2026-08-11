@@ -10,7 +10,11 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;background:#F2F2F7;color:#1C1C1E;min-height:100vh;}
 
 .top-zone{background:#F2F2F7;padding:16px 20px 12px;position:sticky;top:0;z-index:50;}
-.island-wrap{display:flex;justify-content:center;margin-bottom:14px;}
+.island-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:14px;}
+.im-upload-row{display:flex;gap:8px;}
+.im-upload-btn{padding:6px 14px;border-radius:14px;border:none;background:#00796B;color:#fff;font-size:11.5px;font-weight:700;cursor:pointer;transition:all .15s;}
+.im-upload-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,121,107,.35);}
+.im-upload-btn:disabled{opacity:.5;cursor:not-allowed;}
 .island{background:#000;border-radius:24px;transition:all .4s cubic-bezier(.34,1.2,.4,1);overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.18);}
 .island.compact{padding:9px 20px;}
 .island.result{padding:11px 22px;}
@@ -205,6 +209,10 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
         <span class="i-month">8월 2026</span>
         <span class="i-status">대기 중</span>
       </div>
+    </div>
+    <div class="im-upload-row">
+      <button class="im-upload-btn" id="btn-upload-first" onclick="uploadFirstToIM()" title="1차 데이터를 이슈모니터에 그대로 업로드">📤 1차 업로드</button>
+      <button class="im-upload-btn" id="btn-upload-second" onclick="uploadSecondToIM()" title="2차 데이터로 이슈모니터 데이터를 완전히 교체">📤 2차 업로드</button>
     </div>
   </div>
 
@@ -679,7 +687,7 @@ function format(v,isRate=false){
 }
 function fmtWon(v){return Math.round(v).toLocaleString();}
 
-function process(data,cfg){
+function computeStats(data,cfg){
   cfg=cfg||buildLiveConfig();
   const MGRS=cfg.managers,MMAP=cfg.managerMap,BRANDS=cfg.brands||[],TRANSFERS=cfg.transfers||[];
   const transferByRaw={}; TRANSFERS.forEach(t=>{transferByRaw[t.from_raw_name]=t;});
@@ -743,8 +751,14 @@ function process(data,cfg){
       if(brand&&matrix[brand])matrix[brand][mName]+=amount;
     }
   });
-  render(matrix,mStats,total,cfg);
-  return mStats;
+  return {matrix,mStats,total};
+}
+
+function process(data,cfg){
+  cfg=cfg||buildLiveConfig();
+  const r=computeStats(data,cfg);
+  render(r.matrix,r.mStats,r.total,cfg);
+  return r.mStats;
 }
 
 function render(matrix,mStats,total,cfg){
@@ -1318,6 +1332,68 @@ async function uploadChangesToIM(){
     showToast('업로드 실패: '+e.message);
   }
 }
+
+// ── 1차/2차 원본 데이터 → 이슈모니터 sales_orders / sales_report_summary 업로드 ──
+// 계산은 여기서 이미 끝난 상태(computeStats 결과)를 그대로 보내고, 이슈모니터는 재계산 없이 값만 표시함.
+function buildOrdersPayload(rows, source){
+  return rows.map(r=>({
+    report_month:currentMonth, source,
+    sn:r.sn, order_date:r.date, manager:r.manager, manager_raw:r.managerRaw,
+    customer_name:r.orderCust, client:r.client,
+    item_code:r.itemCode, item_name:r.itemName,
+    qty:r.qty, cost:r.cost, amount:r.amount, cost_total:r.costTotal,
+    is_cancel:r.isCancel, ref:r.ref,
+  }));
+}
+function buildSummaryPayload(stats, cfg, source){
+  return {
+    report_month:currentMonth, source,
+    managers:cfg.managers, mstats:stats.mStats, matrix:stats.matrix, total:stats.total,
+    brands:cfg.brands,
+  };
+}
+async function uploadStageToIM(stage){
+  const isFirst = stage==='first';
+  const st = isFirst?state.first:state.second;
+  if(!st){showToast(`${isFirst?'1차':'2차'} 파일을 먼저 업로드하세요`);return;}
+  const btnId = isFirst?'btn-upload-first':'btn-upload-second';
+  const btn = document.getElementById(btnId);
+  const label = isFirst?'1차':'2차';
+  if(btn){btn.disabled=true;btn.textContent='업로드 확인 중...';}
+  try{
+    const cfg = st.cfg||buildLiveConfig();
+    const rows = parseAllRows(st.data);
+    const stats = computeStats(st.data, cfg);
+
+    // 같은 달 기존 데이터 있으면 확인 후 완전 교체
+    const existing = await sbIM(`sales_report_summary?report_month=eq.${encodeURIComponent(currentMonth)}&select=id,source`);
+    if(existing && existing.length){
+      if(!confirm(`⚠️ ${currentMonth} 데이터가 이미 있습니다(${existing[0].source} 기준).\n${label} 데이터로 완전히 교체하시겠습니까?`)){
+        if(btn){btn.disabled=false;btn.textContent=isFirst?'1차 업로드':'2차 업로드';}
+        return;
+      }
+      await sbIM(`sales_orders?report_month=eq.${encodeURIComponent(currentMonth)}`,{method:'DELETE'});
+      await sbIM(`sales_report_summary?report_month=eq.${encodeURIComponent(currentMonth)}`,{method:'DELETE'});
+    }
+
+    if(btn)btn.textContent='업로드 중...';
+    const ordersPayload = buildOrdersPayload(rows, label);
+    if(ordersPayload.length){
+      await sbIM('sales_orders',{method:'POST',prefer:'resolution=merge-duplicates',body:ordersPayload});
+    }
+    const summaryPayload = buildSummaryPayload(stats, cfg, label);
+    await sbIM('sales_report_summary',{method:'POST',prefer:'resolution=merge-duplicates',body:summaryPayload});
+
+    if(btn)btn.textContent='✓ 업로드 완료';
+    showToast(`✅ ${currentMonth} ${label} 데이터 ${ordersPayload.length}건 이슈모니터 업로드 완료`);
+    setTimeout(()=>{if(btn){btn.textContent=isFirst?'1차 업로드':'2차 업로드';btn.disabled=false;}},2000);
+  }catch(e){
+    if(btn){btn.textContent=isFirst?'1차 업로드':'2차 업로드';btn.disabled=false;}
+    showToast('업로드 실패: '+e.message);
+  }
+}
+function uploadFirstToIM(){uploadStageToIM('first');}
+function uploadSecondToIM(){uploadStageToIM('second');}
 
 // 사유 입력칸 잠금/해제 (수정 버튼용)
 function lockReasonInputs(locked){
