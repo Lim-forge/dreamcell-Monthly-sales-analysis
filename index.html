@@ -134,10 +134,10 @@ input[type=file]{display:none;}
 .cr-reason-input.cr-locked{background:#F9F9FB;color:#8E8E93;border-color:#F2F2F7;}
 .cr-reason-input:focus{outline:none;border-color:#0A84FF;}
 .cr-empty{text-align:center;padding:36px;color:#8E8E93;}
-.manual-form{display:flex;flex-wrap:wrap;gap:6px;padding:12px 20px;background:#F9F8FF;border-bottom:1px solid #EDEBFB;}
-.manual-inp{padding:6px 8px;border:1px solid #E0DDF5;border-radius:8px;font-size:11.5px;font-family:inherit;}
+.manual-form{display:flex;flex-wrap:nowrap;gap:6px;padding:12px 20px;background:#F9F8FF;border-bottom:1px solid #EDEBFB;}
+.manual-inp{padding:6px 8px;border:1px solid #E0DDF5;border-radius:8px;font-size:11.5px;font-family:inherit;min-width:0;}
 .manual-inp:focus{outline:none;border-color:#7C6FE0;}
-.manual-add-btn{padding:6px 14px;border:none;border-radius:8px;background:#7C6FE0;color:#fff;font-size:11.5px;font-weight:700;cursor:pointer;}
+.manual-add-btn{padding:6px 16px;border:none;border-radius:8px;background:#7C6FE0;color:#fff;font-size:11.5px;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap;}
 .manual-add-btn:hover{background:#6a5cd4;}
 .manual-del-btn{border:none;background:none;cursor:pointer;font-size:13px;opacity:.6;}
 .manual-del-btn:hover{opacity:1;}
@@ -313,7 +313,7 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
       <div class="cr-header">
         <span class="cr-title" id="cr-title"></span>
         <div class="cr-header-actions">
-          <button class="cr-act-btn report" onclick="exportChangeReport()">📄 보고서</button>
+          <button class="cr-act-btn report" id="cr-report-btn" onclick="exportChangeReport()">📄 보고서</button>
           <button class="cr-act-btn report" id="cr-edit-btn" style="display:none;" onclick="enableReasonEdit()">✏️ 수정</button>
           <button class="cr-act-btn save" id="cr-save-btn" onclick="saveAllReasons()">사유 일괄저장</button>
           <button class="cr-close" onclick="closeChangeReport()">닫기 ×</button>
@@ -1161,15 +1161,18 @@ function toggleChangeReport(type){
   if(type==='amt'){
     document.getElementById('cr-title').textContent='수주 변동 상세 (반품·취소·수량·금액)';
     document.getElementById('cr-save-btn').style.display='inline-block';
+    document.getElementById('cr-report-btn').style.display='inline-block';
     renderEventReport();
   }else if(type==='cost'){
     document.getElementById('cr-title').textContent='발주단가 변동 상세 (10만원↑)';
     document.getElementById('cr-save-btn').style.display='inline-block';
+    document.getElementById('cr-report-btn').style.display='inline-block';
     renderCostReport();
   }else{
     document.getElementById('cr-title').textContent='변동건 수기 입력 (월 무관, 전체 누적)';
     document.getElementById('cr-save-btn').style.display='none';
     document.getElementById('cr-edit-btn').style.display='none';
+    document.getElementById('cr-report-btn').style.display='none';
     renderManualReport();
   }
   report.scrollIntoView({behavior:'smooth',block:'nearest'});
@@ -1221,20 +1224,26 @@ async function renderManualReport(){
 function manualFormHtml(){
   const typeOpts=MANUAL_TYPE_OPTS.map(t=>`<option value="${t}">${t}</option>`).join('');
   return `<div class="manual-form">
-    <select class="manual-inp" id="mf-type" style="width:110px;">${typeOpts}</select>
-    <input class="manual-inp" id="mf-manager" placeholder="담당자" style="width:90px;">
-    <input class="manual-inp" id="mf-date" type="date" style="width:130px;">
-    <input class="manual-inp" id="mf-code" placeholder="품명코드" style="width:100px;">
-    <input class="manual-inp" id="mf-name" placeholder="품명" style="width:150px;">
-    <input class="manual-inp" id="mf-qty" type="number" placeholder="수량" style="width:70px;">
-    <input class="manual-inp" id="mf-orig" type="number" placeholder="원수주금액" style="width:110px;">
-    <input class="manual-inp" id="mf-changed" type="number" placeholder="변동수주금액" style="width:110px;">
-    <input class="manual-inp" id="mf-reason" placeholder="사유" style="width:160px;">
-    <button class="manual-add-btn" onclick="addManualRow()">+ 추가</button>
+    <select class="manual-inp" id="mf-type" style="flex:1.1;min-width:100px;">${typeOpts}</select>
+    <input class="manual-inp" id="mf-manager" placeholder="담당자" style="flex:1;min-width:70px;">
+    <input class="manual-inp" id="mf-date" type="date" style="flex:1.3;min-width:120px;">
+    <input class="manual-inp" id="mf-code" placeholder="품명코드" style="flex:1;min-width:80px;">
+    <input class="manual-inp" id="mf-name" placeholder="품명" style="flex:1.6;min-width:120px;">
+    <input class="manual-inp" id="mf-qty-before" type="number" placeholder="원수량" style="flex:0.8;min-width:60px;">
+    <input class="manual-inp" id="mf-qty-after" type="number" placeholder="변동수량" style="flex:0.8;min-width:60px;">
+    <input class="manual-inp" id="mf-orig" type="number" placeholder="원수주금액" style="flex:1.2;min-width:100px;">
+    <input class="manual-inp" id="mf-changed" type="number" placeholder="변동수주금액" style="flex:1.2;min-width:100px;">
+    <input class="manual-inp" id="mf-reason" placeholder="사유" style="flex:1.6;min-width:120px;">
+    <button class="manual-add-btn" onclick="addManualRow()">+ 추가 (저장)</button>
   </div>`;
 }
 function manualLogTableHtml(rows){
   if(!rows.length)return '<div class="cr-empty" style="margin-top:12px;">아직 입력된 내역이 없습니다</div>';
+  const qtyCellOf=r=>{
+    if(r.qty_before==null && r.qty_after==null)return'';
+    if(r.qty_before!=null && r.qty_after!=null && r.qty_before!==r.qty_after)return `${r.qty_before}<span class="cr-arrow-txt">→</span>${r.qty_after}`;
+    return r.qty_after??r.qty_before??'';
+  };
   const trs=rows.map(r=>{
     const diff=(r.changed_amount!=null&&r.original_amount!=null)?(r.changed_amount-r.original_amount):null;
     return `<tr>
@@ -1243,7 +1252,7 @@ function manualLogTableHtml(rows){
       <td>${r.order_date||''}</td>
       <td>${r.item_code||''}</td>
       <td><div class="cr-item-name" title="${r.item_name||''}">${r.item_name||''}</div></td>
-      <td class="right">${r.qty??''}</td>
+      <td class="right">${qtyCellOf(r)}</td>
       <td class="right">${r.original_amount!=null?fmtWon(r.original_amount):''}</td>
       <td class="right">${r.changed_amount!=null?fmtWon(r.changed_amount):''}${diff!=null?` <span class="${diff<0?'cr-down':'cr-up'}">(${diff>=0?'+':''}${fmtWon(diff)})</span>`:''}</td>
       <td class="right">${r.reason||''}</td>
@@ -1251,18 +1260,19 @@ function manualLogTableHtml(rows){
     </tr>`;
   }).join('');
   return `<table class="cr-table" style="margin-top:14px;"><thead><tr>
-    <th>변동유형</th><th>담당자</th><th>수주일</th><th>품명코드</th><th>품명</th><th class="right">수량</th><th class="right">원수주금액</th><th class="right">변동수주금액</th><th class="right">사유</th><th class="right">삭제</th>
+    <th>변동유형</th><th>담당자</th><th>수주일</th><th>품명코드</th><th>품명</th><th class="right">수량 (원→변동)</th><th class="right">원수주금액</th><th class="right">변동수주금액</th><th class="right">사유</th><th class="right">삭제</th>
   </tr></thead><tbody>${trs}</tbody></table>`;
 }
 async function addManualRow(){
   const v=id=>document.getElementById(id).value.trim();
   const type=v('mf-type'), manager=v('mf-manager'), date=v('mf-date'), code=v('mf-code'), name=v('mf-name');
-  const qty=v('mf-qty'), orig=v('mf-orig'), changed=v('mf-changed'), reason=v('mf-reason');
+  const qtyBefore=v('mf-qty-before'), qtyAfter=v('mf-qty-after'), orig=v('mf-orig'), changed=v('mf-changed'), reason=v('mf-reason');
   if(!name){showToast('품명을 입력해주세요');return;}
   try{
     await sb('manual_change_log',{method:'POST',prefer:'return=minimal',body:[{
       change_type:type, manager, order_date:date||null, item_code:code, item_name:name,
-      qty:qty?Number(qty):null, original_amount:orig?Number(orig):null, changed_amount:changed?Number(changed):null,
+      qty_before:qtyBefore?Number(qtyBefore):null, qty_after:qtyAfter?Number(qtyAfter):null,
+      original_amount:orig?Number(orig):null, changed_amount:changed?Number(changed):null,
       reason,
     }]});
     showToast('✅ 수기 입력 저장됨');
