@@ -1345,12 +1345,26 @@ function buildOrdersPayload(rows, source){
     is_cancel:r.isCancel, ref:r.ref,
   }));
 }
-function buildSummaryPayload(stats, cfg, source){
+function buildSummaryPayload(stats, cfg, source, changeCards, mgrDiffArr){
   return {
     report_month:currentMonth, source,
     managers:cfg.managers, mstats:stats.mStats, matrix:stats.matrix, total:stats.total,
     brands:cfg.brands,
+    change_cards: changeCards||null, mgr_diff: mgrDiffArr||null,
   };
+}
+// 2차 업로드 전용: 1차와 비교해서 카드(수주변동/발주단가변동)·담당자별 매출변동 데이터 계산
+function buildChangeCardsAndMgrDiff(firstStats){
+  if(!state.first||!state.second) return {changeCards:null, mgrDiffArr:null};
+  const cd = computeChanges(); // 전역 changeData 갱신 (1차 vs 2차 비교, 기존 로직 그대로)
+  changeData = cd;
+  const evCount = cd.changeEvents.length + cd.unmatched.length;
+  const costCount = cd.costChange.length;
+  const amtDiff = cd.changeEvents.reduce((s,e)=>s+(e.a2!==null?e.a2-e.a1:0),0);
+  const costDiff = cd.costChange.reduce((s,r)=>s+r.total_diff,0);
+  const changeCards = { amtCount:evCount, amtDiff, costCount, costDiff };
+  const mgrDiffArr = computeMgrDiffFromStats(firstStats.mStats, computeStats(state.second.data, state.second.cfg||buildLiveConfig()).mStats);
+  return {changeCards, mgrDiffArr};
 }
 async function uploadStageToIM(stage){
   const isFirst = stage==='first';
@@ -1381,7 +1395,13 @@ async function uploadStageToIM(stage){
     if(ordersPayload.length){
       await sbIM('sales_orders',{method:'POST',prefer:'resolution=merge-duplicates',body:ordersPayload});
     }
-    const summaryPayload = buildSummaryPayload(stats, cfg, label);
+    let changeCards=null, mgrDiffArr=null;
+    if(!isFirst && state.first){
+      const firstStats = computeStats(state.first.data, state.first.cfg||buildLiveConfig());
+      const r = buildChangeCardsAndMgrDiff(firstStats);
+      changeCards = r.changeCards; mgrDiffArr = r.mgrDiffArr;
+    }
+    const summaryPayload = buildSummaryPayload(stats, cfg, label, changeCards, mgrDiffArr);
     await sbIM('sales_report_summary',{method:'POST',prefer:'resolution=merge-duplicates',body:summaryPayload});
 
     if(btn)btn.textContent='✓ 업로드 완료';
