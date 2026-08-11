@@ -290,7 +290,6 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
           <button class="cr-act-btn report" onclick="exportChangeReport()">📄 보고서</button>
           <button class="cr-act-btn report" id="cr-edit-btn" style="display:none;" onclick="enableReasonEdit()">✏️ 수정</button>
           <button class="cr-act-btn save" id="cr-save-btn" onclick="saveAllReasons()">사유 일괄저장</button>
-          <button class="cr-act-btn" id="cr-im-btn" style="display:none;background:#00796B;color:#fff;" onclick="uploadChangesToIM()">📤 이슈모니터 업로드</button>
           <button class="cr-close" onclick="closeChangeReport()">닫기 ×</button>
         </div>
       </div>
@@ -1133,11 +1132,9 @@ function toggleChangeReport(type){
   report.style.display='block';
   if(type==='amt'){
     document.getElementById('cr-title').textContent='수주 변동 상세 (반품·취소·수량·금액)';
-    document.getElementById('cr-im-btn').style.display='inline-block';
     renderEventReport();
   }else{
     document.getElementById('cr-title').textContent='발주단가 변동 상세 (10만원↑)';
-    document.getElementById('cr-im-btn').style.display='none';
     renderCostReport();
   }
   report.scrollIntoView({behavior:'smooth',block:'nearest'});
@@ -1275,62 +1272,53 @@ async function saveAllReasons(){
 
 // ── 수주취소·변경건 → 이슈모니터 업로드 ──
 // 화면에 떠있는 사유 입력칸의 "현재 값"을 그대로 사용 (저장 여부와 무관하게 최신 입력 반영)
-async function uploadChangesToIM(){
-  if(currentReportType!=='amt'){showToast('수주 변동 리포트에서만 업로드할 수 있습니다');return;}
+// 수주 변동 상세 → order_issues payload 빌더 (사유는 화면에 입력된 현재값 우선, 없으면 저장된 값)
+function buildOrderIssuesPayload(){
   const events=changeData.changeEvents||[];
   const unmatched=changeData.unmatched||[];
-  if(!events.length && !unmatched.length){showToast('업로드할 변동 건이 없습니다');return;}
-
-  const btn=document.getElementById('cr-im-btn');
-  btn.disabled=true;btn.textContent='업로드 확인 중...';
-
-  try{
-    // 이 달에 이미 업로드된 게 있으면 확인
-    const existing=await sbIM(`order_issues?report_month=eq.${encodeURIComponent(currentMonth)}&select=id`);
-    if(existing && existing.length){
-      if(!confirm(`⚠️ ${currentMonth} 수주취소·변경건이 이미 ${existing.length}건 업로드돼 있습니다.\n기존 데이터를 지우고 다시 올리시겠습니까?`)){
-        btn.disabled=false;btn.textContent='📤 이슈모니터 업로드';return;
-      }
-      await sbIM(`order_issues?report_month=eq.${encodeURIComponent(currentMonth)}`,{method:'DELETE'});
-    }
-
-    const payload=[];
-    events.forEach(e=>{
-      const reasonInput=document.querySelector(`.reason-cell[data-key="${e.sn}_event"]`);
-      const reason=reasonInput?reasonInput.value.trim():(reasonMap[`${e.sn}_event`]||'');
-      payload.push({
-        sn:e.sn, order_date:e.date, customer_name:e.customer||'', manager:e.manager,
-        item_code:e.itemCode, item_name:e.itemName,
-        change_types:Array.from(e.types||[]).join(','),
-        qty_before:e.q1, qty_after:e.q2,
-        amount_before:e.a1, amount_after:e.a2,
-        amount_diff:e.a2!=null?(e.a2-e.a1):0,
-        reason, report_month:currentMonth,
-      });
+  const payload=[];
+  events.forEach(e=>{
+    const reasonInput=document.querySelector(`.reason-cell[data-key="${e.sn}_event"]`);
+    const reason=reasonInput?reasonInput.value.trim():(reasonMap[`${e.sn}_event`]||'');
+    payload.push({
+      sn:e.sn, order_date:e.date, customer_name:e.customer||'', manager:e.manager,
+      item_code:e.itemCode, item_name:e.itemName,
+      change_types:Array.from(e.types||[]).join(','),
+      qty_before:e.q1, qty_after:e.q2,
+      amount_before:e.a1, amount_after:e.a2,
+      amount_diff:e.a2!=null?(e.a2-e.a1):0,
+      reason, report_month:currentMonth,
     });
-    unmatched.forEach(u=>{
-      const reasonInput=document.querySelector(`.reason-cell[data-key="${u.sn}_unmatched"]`);
-      const reason=reasonInput?reasonInput.value.trim():(reasonMap[`${u.sn}_unmatched`]||'');
-      payload.push({
-        sn:u.sn, order_date:u.date, customer_name:u.orderCust||'', manager:u.type||'',
-        item_code:u.itemCode, item_name:u.itemName,
-        change_types:'원본미상',
-        qty_before:null, qty_after:u.qty,
-        amount_before:null, amount_after:u.amt,
-        amount_diff:u.amt||0,
-        reason, report_month:currentMonth,
-      });
+  });
+  unmatched.forEach(u=>{
+    const reasonInput=document.querySelector(`.reason-cell[data-key="${u.sn}_unmatched"]`);
+    const reason=reasonInput?reasonInput.value.trim():(reasonMap[`${u.sn}_unmatched`]||'');
+    payload.push({
+      sn:u.sn, order_date:u.date, customer_name:u.orderCust||'', manager:u.type||'',
+      item_code:u.itemCode, item_name:u.itemName,
+      change_types:'원본미상',
+      qty_before:null, qty_after:u.qty,
+      amount_before:null, amount_after:u.amt,
+      amount_diff:u.amt||0,
+      reason, report_month:currentMonth,
     });
-
-    btn.textContent='업로드 중...';
-    await sbIM('order_issues',{method:'POST',prefer:'resolution=merge-duplicates',body:payload});
-    btn.textContent='✓ 업로드 완료';
-    showToast(`✅ ${currentMonth} 수주취소·변경건 ${payload.length}건 이슈모니터 업로드 완료`);
-    setTimeout(()=>{btn.textContent='📤 이슈모니터 업로드';btn.disabled=false;},2000);
-  }catch(e){
-    btn.textContent='📤 이슈모니터 업로드';btn.disabled=false;
-    showToast('업로드 실패: '+e.message);
-  }
+  });
+  return payload;
+}
+// 발주단가 변동 상세 → sales_cost_changes payload 빌더
+function buildCostChangesPayload(){
+  const items=changeData.costChange||[];
+  return items.map(r=>{
+    const reasonInput=document.querySelector(`.reason-cell[data-key="${r.sn}_cost"]`);
+    const reason=reasonInput?reasonInput.value.trim():(reasonMap[`${r.sn}_cost`]||'');
+    return {
+      sn:r.sn, order_date:r.date, manager:r.manager,
+      item_code:r.itemCode, item_name:r.itemName, qty:r.qty,
+      cost_before:r.first_cost, cost_after:r.second_cost, cost_diff:r.cost_diff,
+      total_before:r.first_total, total_after:r.second_total, total_diff:r.total_diff,
+      reason, report_month:currentMonth,
+    };
+  });
 }
 
 // ── 1차/2차 원본 데이터 → 이슈모니터 sales_orders / sales_report_summary 업로드 ──
@@ -1388,6 +1376,8 @@ async function uploadStageToIM(stage){
       }
       await sbIM(`sales_orders?report_month=eq.${encodeURIComponent(currentMonth)}`,{method:'DELETE'});
       await sbIM(`sales_report_summary?report_month=eq.${encodeURIComponent(currentMonth)}`,{method:'DELETE'});
+      await sbIM(`order_issues?report_month=eq.${encodeURIComponent(currentMonth)}`,{method:'DELETE'});
+      await sbIM(`sales_cost_changes?report_month=eq.${encodeURIComponent(currentMonth)}`,{method:'DELETE'});
     }
 
     if(btn)btn.textContent='업로드 중...';
@@ -1400,6 +1390,15 @@ async function uploadStageToIM(stage){
       const firstStats = computeStats(state.first.data, state.first.cfg||buildLiveConfig());
       const r = buildChangeCardsAndMgrDiff(firstStats);
       changeCards = r.changeCards; mgrDiffArr = r.mgrDiffArr;
+      // 수주 변동 상세(사유 포함) + 발주단가 변동 상세(사유 포함) 업로드
+      const issuesPayload = buildOrderIssuesPayload();
+      if(issuesPayload.length){
+        await sbIM('order_issues',{method:'POST',prefer:'resolution=merge-duplicates',body:issuesPayload});
+      }
+      const costPayload = buildCostChangesPayload();
+      if(costPayload.length){
+        await sbIM('sales_cost_changes',{method:'POST',prefer:'resolution=merge-duplicates',body:costPayload});
+      }
     }
     const summaryPayload = buildSummaryPayload(stats, cfg, label, changeCards, mgrDiffArr);
     await sbIM('sales_report_summary',{method:'POST',prefer:'resolution=merge-duplicates',body:summaryPayload});
