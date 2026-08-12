@@ -11,16 +11,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;bac
 
 .top-zone{background:#F2F2F7;padding:16px 20px 12px;position:sticky;top:0;z-index:50;}
 .island-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:14px;}
-.im-upload-row{display:flex;gap:8px;}
-.im-upload-btn{padding:5px 12px;border-radius:14px;border:none;color:#fff;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;}
-.im-upload-btn-1{background:#2e9e6e;}
-.im-upload-btn-1:hover:not(:disabled){box-shadow:0 4px 12px rgba(46,158,110,.35);}
-.im-upload-btn-2{background:#4a7fc1;}
-.im-upload-btn-2:hover:not(:disabled){box-shadow:0 4px 12px rgba(74,127,193,.35);}
-.im-upload-btn:hover:not(:disabled){transform:translateY(-1px);}
-.im-upload-btn:disabled{opacity:.5;cursor:not-allowed;}
-.uc-col{display:flex;flex-direction:column;gap:5px;flex:1;}
-.uc-col .im-upload-btn{align-self:center;}
 .island{background:#000;border-radius:24px;transition:all .4s cubic-bezier(.34,1.2,.4,1);overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.18);}
 .island.compact{padding:9px 20px;}
 .island.result{padding:11px 22px;}
@@ -31,65 +21,85 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;bac
 .i-status{font-size:12px;color:rgba(255,255,255,.55);}
 .i-divider{width:1px;height:14px;background:rgba(255,255,255,.15);}
 
-.control-row{display:flex;gap:12px;align-items:stretch;}
-.month-picker{background:#fff;border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;width:120px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.control-row{display:flex;gap:16px;align-items:stretch;}
+.month-picker{background:transparent;border:none;box-shadow:none;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex-shrink:0;width:104px;}
 .mp-nav{display:flex;align-items:center;gap:4px;}
-.mp-arr{width:24px;height:24px;border:none;background:#F2F2F7;border-radius:8px;font-size:14px;color:#1C1C1E;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.mp-arr:hover{background:#E5E5EA;}
-.mp-year{font-size:10px;color:#8E8E93;}
-.mp-month{font-size:26px;font-weight:800;color:#1C1C1E;line-height:1;}
+.mp-arr{width:24px;height:24px;border:none;background:#F2F2F7;border-radius:50%;font-size:14px;color:#5A5A60;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.mp-arr:hover{background:#0A84FF;color:#fff;transform:scale(1.08);}
+.mp-year{font-size:10px;color:#8E8E93;letter-spacing:.03em;}
+.mp-month{font-size:27px;font-weight:800;line-height:1;background:linear-gradient(135deg,#0A84FF,#5E8CFF 60%,#7C6FE0);-webkit-background-clip:text;background-clip:text;color:transparent;}
 .mp-select{border:none;background:transparent;font-size:10px;color:#0A84FF;cursor:pointer;text-align:center;font-weight:600;}
 
-.upload-cards{display:flex;gap:10px;flex:1;}
-.ucard{position:relative;flex:1;background:#fff;border:2px dashed #D1D1D6;border-radius:16px;padding:10px 14px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.04);}
-.ucard:hover{border-color:#0A84FF;}
+/* ── 액션 버튼 줄 (1차/2차 업로드, 새로 생성) ── */
+.action-row{display:flex;gap:8px;align-items:center;flex:1;}
+.im-upload-btn{padding:9px 15px;border-radius:12px;border:none;color:#fff;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.06);}
+.im-upload-btn-1{background:linear-gradient(135deg,#33B87A,#1F8F5C);}
+.im-upload-btn-1:hover:not(:disabled){box-shadow:0 6px 16px rgba(31,143,92,.35);}
+.im-upload-btn-2{background:linear-gradient(135deg,#4E93E8,#3468BD);}
+.im-upload-btn-2:hover:not(:disabled){box-shadow:0 6px 16px rgba(52,104,189,.35);}
+.im-upload-btn:hover:not(:disabled){transform:translateY(-1.5px);}
+.im-upload-btn:active:not(:disabled){transform:translateY(0);}
+.im-upload-btn:disabled{opacity:.5;cursor:not-allowed;}
+.btn-icon{width:15px;height:15px;flex-shrink:0;}
+.fresh-btn{background:#F5F4FC;border:1.5px solid transparent;border-radius:12px;padding:9px 16px;font-size:12.5px;font-weight:700;color:#7C6FE0;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .15s;margin-left:auto;}
+.fresh-btn:hover{border-color:#7C6FE0;background:#EFEDFB;color:#6a5cd4;transform:translateY(-1.5px);box-shadow:0 6px 16px rgba(124,111,224,.2);}
+.fresh-btn:active{transform:translateY(0);}
+
+/* ── 카드 한 줄 (업로드카드 2개 + 변동카드 3개) ── */
+.cards-row{display:flex;gap:10px;margin:12px 0 14px;}
+.ucard{position:relative;flex:1.3;min-width:0;background:#fff;border:2px dashed #D1D1D6;border-radius:14px;padding:9px 12px;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:9px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.ucard:hover{border-color:#0A84FF;transform:translateY(-1.5px);box-shadow:0 6px 16px rgba(0,0,0,.08);}
+.ucard.cat-green{background:#F7FCF9;border-color:#CDEBD9;}
+.ucard.cat-blue{background:#F6FAFE;border-color:#CBE1F7;}
 .ucard.done-1{border-style:solid;border-color:#30D158;background:#F1FBF3;}
 .ucard.done-2{border-style:solid;border-color:#0A84FF;background:#EEF6FF;}
 .ucard.preview-1,.ucard.preview-2{border-style:solid;border-color:#FF9F0A;background:#FFF8EF;}
 .ucard.drag-over{border-color:#FF9F0A;background:#FFF8EF;transform:scale(1.01);}
-.uc-tag{font-size:9px;font-weight:700;letter-spacing:.05em;color:#8E8E93;margin-bottom:2px;}
+.uc-badge{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:#E5E5EA;color:#8E8E93;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .18s;}
+.ucard.done-1 .uc-badge{background:#30D158;color:#fff;}
+.ucard.done-2 .uc-badge{background:#0A84FF;color:#fff;}
+.ucard.preview-1 .uc-badge,.ucard.preview-2 .uc-badge{background:#FF9F0A;color:#fff;}
+.uc-text{min-width:0;flex:1;}
+.uc-tag{font-size:9px;font-weight:700;letter-spacing:.03em;color:#8E8E93;margin-bottom:1px;}
 .ucard.done-1 .uc-tag{color:#248A3D;}
 .ucard.done-2 .uc-tag{color:#0A6FD8;}
 .ucard.preview-1 .uc-tag,.ucard.preview-2 .uc-tag{color:#C77700;}
-.uc-name{font-size:12px;font-weight:600;color:#1C1C1E;}
-.uc-date{font-size:10px;color:#8E8E93;margin-top:1px;}
-.uc-actions{display:none;position:absolute;top:8px;right:8px;gap:6px;}
+.uc-name{font-size:12px;font-weight:700;color:#1C1C1E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.uc-date{font-size:9.5px;color:#8E8E93;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+.uc-actions{display:none;position:absolute;top:6px;right:6px;gap:5px;}
 .ucard.preview-1 .uc-actions,.ucard.preview-2 .uc-actions{display:flex;}
-.uc-del{width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,.08);color:#8E8E93;font-size:13px;line-height:22px;text-align:center;cursor:pointer;padding:0;}
+.uc-del{width:20px;height:20px;border-radius:50%;border:none;background:rgba(0,0,0,.08);color:#8E8E93;font-size:12px;line-height:20px;text-align:center;cursor:pointer;padding:0;}
 .uc-del:hover{background:#FFEBE9;color:#D70015;}
-.uc-save{padding:0 10px;height:22px;border-radius:11px;border:none;background:#1C1C1E;color:#fff;font-size:11px;font-weight:700;cursor:pointer;}
+.uc-save{padding:0 9px;height:20px;border-radius:10px;border:none;background:#1C1C1E;color:#fff;font-size:10px;font-weight:700;cursor:pointer;}
 .uc-save:hover{background:#0A84FF;}
 input[type=file]{display:none;}
-.fresh-btn{background:#fff;border:1.5px dashed #D1D1D6;border-radius:16px;padding:0 18px;font-size:12px;font-weight:700;color:#6E6E73;cursor:pointer;flex-shrink:0;width:88px;display:flex;align-items:center;justify-content:center;text-align:center;transition:all .15s;box-shadow:0 1px 3px rgba(0,0,0,.04);}
-.fresh-btn:hover{border-color:#0A84FF;color:#0A84FF;background:#F5FAFF;}
-.fresh-btn:hover{background:#F2F2F7;}
 
 .body-zone{padding:4px 20px 40px;}
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;color:#8E8E93;gap:10px;text-align:center;}
-.empty-icon{font-size:44px;}
+.empty-icon{color:#AEC3F2;display:flex;justify-content:center;}
 .empty-text{font-size:15px;font-weight:600;color:#3A3A3C;}
 .empty-sub{font-size:12px;}
 
-.change-cards{display:flex;gap:12px;margin:14px 0;}
-.chcard{flex:1;background:#fff;border-radius:16px;padding:16px 18px;cursor:pointer;transition:all .18s;box-shadow:0 1px 3px rgba(0,0,0,.05);border:1.5px solid transparent;}
-.chcard:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.08);}
-.chcard.amt{border-color:#FFE5B4;}
-.chcard.cost{border-color:#FFD4CC;}
-.chcard.manual{border-color:#D6D0FA;}
-.chcard-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.chcard-icon{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;}
-.chcard.amt .chcard-icon{background:#FFF4E0;}
-.chcard.cost .chcard-icon{background:#FFEEEA;}
-.chcard.manual .chcard-icon{background:#F0EDFC;}
-.chcard-arrow{font-size:18px;color:#C7C7CC;}
-.chcard-count{font-size:24px;font-weight:800;color:#1C1C1E;line-height:1;}
-.chcard-count .unit{font-size:14px;font-weight:600;color:#8E8E93;margin-left:2px;}
-.chcard-label{font-size:12px;color:#8E8E93;margin-top:4px;}
-.chcard-sub{font-size:11px;margin-top:6px;font-weight:600;}
+.chcard{flex:1;min-width:0;background:#fff;border-radius:14px;padding:8px 12px;cursor:pointer;transition:all .18s;box-shadow:0 1px 3px rgba(0,0,0,.05);border:1.5px solid transparent;display:flex;align-items:center;gap:9px;}
+.chcard:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.08);}
+.chcard.amt{border-color:#FFE5B4;background:#FFFBF3;}
+.chcard.cost{border-color:#FFD4CC;background:#FFF8F6;}
+.chcard.manual{border-color:#D6D0FA;background:#FBFAFF;}
+.chcard-icon{flex-shrink:0;width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.chcard.amt .chcard-icon{background:#FFF4E0;color:#C77700;}
+.chcard.cost .chcard-icon{background:#FFEEEA;color:#C7362B;}
+.chcard.manual .chcard-icon{background:#F0EDFC;color:#7C6FE0;}
+.chcard-body{min-width:0;flex:1;}
+.chcard-top{display:flex;align-items:baseline;gap:4px;}
+.chcard-arrow{display:none;}
+.chcard-count{font-size:15px;font-weight:800;color:#1C1C1E;line-height:1.1;}
+.chcard-count .unit{font-size:10px;font-weight:600;color:#8E8E93;margin-left:1px;}
+.chcard-label{font-size:9.5px;color:#8E8E93;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+.chcard-sub{font-size:9.5px;margin-top:1px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .chcard.amt .chcard-sub{color:#C77700;}
 .chcard.cost .chcard-sub{color:#C7362B;}
 .chcard.manual .chcard-sub{color:#7C6FE0;}
-.chcard-sub.empty{color:#30D158!important;}
+.chcard-sub.empty{color:#B9BEC7!important;}
 
 /* 인라인 변동 리포트 */
 .chcard.active{border-width:2px;}
@@ -155,6 +165,10 @@ input[type=file]{display:none;}
 .rh-dot{width:9px;height:9px;border-radius:50%;background:#0A84FF;}
 .rh-title{font-size:17px;font-weight:800;color:#1C1C1E;}
 .rh-badge{font-size:11px;padding:3px 12px;border-radius:20px;background:#EAF2FE;color:#0A6FD8;font-weight:600;}
+.rh-toggle{display:flex;background:#F2F2F7;border-radius:20px;padding:2px;gap:2px;}
+.rh-toggle-btn{border:none;background:transparent;padding:5px 13px;border-radius:18px;font-size:11.5px;font-weight:700;color:#8E8E93;cursor:pointer;transition:all .15s;}
+.rh-toggle-btn.active{background:#1C1C1E;color:#fff;}
+.rh-toggle-btn:hover:not(.active){color:#1C1C1E;}
 .rh-actions{margin-left:auto;display:flex;gap:8px;}
 .rh-btn{padding:8px 16px;border:none;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;}
 .rh-btn.excel{background:#1C1C1E;color:#fff;}
@@ -208,7 +222,7 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
 @media print{
   @page{size:A3 landscape;margin:8mm;}
   body{background:#fff;}
-  .top-zone,.change-cards,.mgr-diff-card,.rh-actions,.settings-fab,#toast{display:none!important;}
+  .top-zone,.mgr-diff-card,.rh-actions,.settings-fab,#toast{display:none!important;}
   .body-zone{padding:0;}
   .report-scroll{box-shadow:none;padding:0;border-radius:0;overflow:visible;}
   .report-header{display:none;}
@@ -241,73 +255,90 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
       <select class="mp-select" id="month-sel" onchange="onMonthChange()"></select>
     </div>
 
-    <div class="upload-cards">
-      <div class="uc-col">
-        <button class="im-upload-btn im-upload-btn-1" id="btn-upload-first" onclick="uploadFirstToIM()" title="1차 데이터를 이슈모니터에 그대로 업로드">📌 1차 업로드</button>
-        <div class="ucard" id="uc1"
-          onclick="document.getElementById('f1').click()"
-          ondragover="onDragOver(event,this)" ondragleave="onDragLeave(this)" ondrop="onDrop(event,1,this)">
-          <div class="uc-actions">
-            <button class="uc-save" id="uc1-save" style="display:none;" onclick="openSaveModal(1,event)">저장</button>
-            <button class="uc-del" onclick="clearPreview(1,event)" title="미리보기 빼기">×</button>
-          </div>
-          <div class="uc-tag" id="uc1-tag">1차 · 월초 업로드</div>
-          <div class="uc-name" id="uc1-name">파일 클릭 또는 드래그</div>
-          <div class="uc-date" id="uc1-date">수주 데이터 (.xlsx)</div>
-        </div>
-      </div>
-      <input type="file" id="f1" accept=".xlsx,.xls" onchange="handleFile(1,this)">
-
-      <div class="uc-col">
-        <button class="im-upload-btn im-upload-btn-2" id="btn-upload-second" onclick="uploadSecondToIM()" title="2차 데이터로 이슈모니터 데이터를 완전히 교체">🔄 2차 업로드</button>
-        <div class="ucard" id="uc2"
-          onclick="if(state.first)document.getElementById('f2').click();else showToast('1차 파일을 먼저 업로드하세요')"
-          ondragover="onDragOver(event,this)" ondragleave="onDragLeave(this)" ondrop="onDrop(event,2,this)">
-          <div class="uc-actions">
-            <button class="uc-save" id="uc2-save" style="display:none;" onclick="openSaveModal(2,event)">저장</button>
-            <button class="uc-del" onclick="clearPreview(2,event)" title="미리보기 빼기">×</button>
-          </div>
-          <div class="uc-tag" id="uc2-tag">2차 · 월말 업로드</div>
-          <div class="uc-name" id="uc2-name">1차 업로드 후 가능</div>
-          <div class="uc-date" id="uc2-date">금액·발주단가 변동 자동 확인</div>
-        </div>
-      </div>
-      <input type="file" id="f2" accept=".xlsx,.xls" onchange="handleFile(2,this)">
+    <div class="action-row">
+      <button class="im-upload-btn im-upload-btn-1" id="btn-upload-first" onclick="uploadFirstToIM()" title="1차 데이터를 이슈모니터에 그대로 업로드">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        1차 업로드
+      </button>
+      <button class="im-upload-btn im-upload-btn-2" id="btn-upload-second" onclick="uploadSecondToIM()" title="2차 데이터로 이슈모니터 데이터를 완전히 교체">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none"><path d="M17 2l4 4-4 4M3 11V9a4 4 0 014-4h14M7 22l-4-4 4-4M21 13v2a4 4 0 01-4 4H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        2차 업로드
+      </button>
+      <button class="fresh-btn" onclick="startFresh()" title="화면을 비우고 새로 시작 (저장된 데이터는 안전합니다)">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="3 3 3 8 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        새로 생성
+      </button>
     </div>
+  </div>
 
-    <button class="fresh-btn" onclick="startFresh()" title="화면을 비우고 새로 시작 (저장된 데이터는 안전합니다)">↻ 새로 생성</button>
+  <div class="cards-row">
+    <div class="ucard cat-green" id="uc1"
+      onclick="document.getElementById('f1').click()"
+      ondragover="onDragOver(event,this)" ondragleave="onDragLeave(this)" ondrop="onDrop(event,1,this)">
+      <div class="uc-badge" id="uc1-badge">📌</div>
+      <div class="uc-text">
+        <div class="uc-tag" id="uc1-tag">1차 · 월초 업로드</div>
+        <div class="uc-name" id="uc1-name" title="">파일 클릭 또는 드래그</div>
+        <div class="uc-date" id="uc1-date">수주 데이터 (.xlsx)</div>
+      </div>
+      <div class="uc-actions">
+        <button class="uc-save" id="uc1-save" style="display:none;" onclick="openSaveModal(1,event)">저장</button>
+        <button class="uc-del" onclick="clearPreview(1,event)" title="미리보기 빼기">×</button>
+      </div>
+    </div>
+    <input type="file" id="f1" accept=".xlsx,.xls" onchange="handleFile(1,this)">
+
+    <div class="ucard cat-blue" id="uc2"
+      onclick="if(state.first)document.getElementById('f2').click();else showToast('1차 파일을 먼저 업로드하세요')"
+      ondragover="onDragOver(event,this)" ondragleave="onDragLeave(this)" ondrop="onDrop(event,2,this)">
+      <div class="uc-badge" id="uc2-badge">🔄</div>
+      <div class="uc-text">
+        <div class="uc-tag" id="uc2-tag">2차 · 월말 업로드</div>
+        <div class="uc-name" id="uc2-name" title="">1차 업로드 후 가능</div>
+        <div class="uc-date" id="uc2-date">금액·발주단가 변동 자동 확인</div>
+      </div>
+      <div class="uc-actions">
+        <button class="uc-save" id="uc2-save" style="display:none;" onclick="openSaveModal(2,event)">저장</button>
+        <button class="uc-del" onclick="clearPreview(2,event)" title="미리보기 빼기">×</button>
+      </div>
+    </div>
+    <input type="file" id="f2" accept=".xlsx,.xls" onchange="handleFile(2,this)">
+
+    <div class="chcard amt" id="chcard-amt" onclick="toggleChangeReport('amt')">
+      <div class="chcard-icon"><svg viewBox="0 0 24 24" fill="none" width="15" height="15"><path d="M8 3L4 7l4 4M4 7h16M16 21l4-4-4-4M20 17H4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="chcard-body">
+        <div class="chcard-top"><span class="chcard-count"><span id="amt-count">0</span><span class="unit">건</span></span></div>
+        <div class="chcard-label">수주 변동 (반품·취소·수량·금액)</div>
+        <div class="chcard-sub empty" id="amt-sub">비교 데이터 없음</div>
+      </div>
+    </div>
+    <div class="chcard cost" id="chcard-cost" onclick="toggleChangeReport('cost')">
+      <div class="chcard-icon"><svg viewBox="0 0 24 24" fill="none" width="15" height="15"><path d="M21 8l-9-5-9 5 9 5 9-5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M3 8v8l9 5 9-5V8" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 13v8" stroke="currentColor" stroke-width="2"/></svg></div>
+      <div class="chcard-body">
+        <div class="chcard-top"><span class="chcard-count"><span id="cost-count">0</span><span class="unit">건</span></span></div>
+        <div class="chcard-label">발주단가 변동 (10만↑)</div>
+        <div class="chcard-sub empty" id="cost-sub">비교 데이터 없음</div>
+      </div>
+    </div>
+    <div class="chcard manual" id="chcard-manual" onclick="toggleChangeReport('manual')">
+      <div class="chcard-icon"><svg viewBox="0 0 24 24" fill="none" width="15" height="15"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="chcard-body">
+        <div class="chcard-top"><span class="chcard-count"><span id="manual-count">0</span><span class="unit">건</span></span></div>
+        <div class="chcard-label">변동건 수기 입력</div>
+        <div class="chcard-sub" id="manual-sub">전체 누적 (월 무관)</div>
+      </div>
+    </div>
   </div>
 </div>
 
 <div class="body-zone">
   <div class="empty-state" id="empty-state">
-    <div class="empty-icon">📊</div>
+    <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" width="48" height="48"><path d="M3 3v18h18" stroke="#C7C7CC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 17v-4" stroke="#FF9F0A" stroke-width="2.5" stroke-linecap="round"/><path d="M13 17V9" stroke="#30D158" stroke-width="2.5" stroke-linecap="round"/><path d="M18 17V5" stroke="#0A84FF" stroke-width="2.5" stroke-linecap="round"/></svg></div>
     <div class="empty-text">엑셀 파일을 업로드하면 분석이 시작됩니다</div>
     <div class="empty-sub">수주 데이터 파일을 업로드하세요</div>
   </div>
 
-  <div id="change-section" style="display:none;">
-    <div class="change-cards">
-      <div class="chcard amt" id="chcard-amt" onclick="toggleChangeReport('amt')">
-        <div class="chcard-top"><div class="chcard-icon">💰</div><div class="chcard-arrow" id="arrow-amt">›</div></div>
-        <div class="chcard-count"><span id="amt-count">0</span><span class="unit">건</span></div>
-        <div class="chcard-label">수주 변동 (반품·취소·수량·금액)</div>
-        <div class="chcard-sub" id="amt-sub"></div>
-      </div>
-      <div class="chcard cost" id="chcard-cost" onclick="toggleChangeReport('cost')">
-        <div class="chcard-top"><div class="chcard-icon">📦</div><div class="chcard-arrow" id="arrow-cost">›</div></div>
-        <div class="chcard-count"><span id="cost-count">0</span><span class="unit">건</span></div>
-        <div class="chcard-label">발주단가 변동 (10만↑)</div>
-        <div class="chcard-sub" id="cost-sub"></div>
-      </div>
-      <div class="chcard manual" id="chcard-manual" onclick="toggleChangeReport('manual')">
-        <div class="chcard-top"><div class="chcard-icon">📝</div><div class="chcard-arrow" id="arrow-manual">›</div></div>
-        <div class="chcard-count"><span id="manual-count">0</span><span class="unit">건</span></div>
-        <div class="chcard-label">변동건 수기 입력</div>
-        <div class="chcard-sub" id="manual-sub">전체 누적 (월 무관)</div>
-      </div>
-    </div>
-
+  <div id="change-section">
     <!-- 인라인 상세 리포트 -->
     <div class="change-report" id="change-report" style="display:none;">
       <div class="cr-header">
@@ -333,6 +364,10 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
       <div class="rh-dot"></div>
       <span class="rh-title" id="rh-title"></span>
       <span class="rh-badge" id="rh-badge"></span>
+      <div class="rh-toggle" id="rh-toggle" style="display:none;">
+        <button class="rh-toggle-btn" id="rh-toggle-1" onclick="switchReportView(1)">1차</button>
+        <button class="rh-toggle-btn" id="rh-toggle-2" onclick="switchReportView(2)">2차</button>
+      </div>
       <div class="rh-actions">
         <button class="rh-btn pdf" onclick="window.print()">PDF 출력</button>
         <button class="rh-btn excel" onclick="exportToExcel()">엑셀 저장</button>
@@ -692,6 +727,8 @@ let state={first:null,second:null};
 let changeData={changeEvents:[],unmatched:[],costChange:[]};
 let reasonMap={};
 let stats1Cache=null;
+// 1차/2차 전체 계산결과(matrix/mStats/total) + 당시 설정 스냅샷 캐시 — 요약표 토글용
+let fullStats1=null,fullStats2=null,cfg1Cache=null,cfg2Cache=null;
 
 function showToast(m,d=2500){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 function safeParse(val){
@@ -779,11 +816,34 @@ function computeStats(data,cfg){
   return {matrix,mStats,total};
 }
 
-function process(data,cfg){
+function process(data,cfg,cycle){
   cfg=cfg||buildLiveConfig();
   const r=computeStats(data,cfg);
   render(r.matrix,r.mStats,r.total,cfg);
+  if(cycle===1){fullStats1=r;cfg1Cache=cfg;}
+  else if(cycle===2){fullStats2=r;cfg2Cache=cfg;}
+  updateReportToggle();
   return r.mStats;
+}
+
+// 요약표 1차/2차 토글: 이미 계산되어 캐시된 값을 다시 렌더링만 함 (재계산 없음)
+function switchReportView(cycle){
+  if(cycle===1&&fullStats1){ render(fullStats1.matrix,fullStats1.mStats,fullStats1.total,cfg1Cache); updateReportTitle('1차'); }
+  else if(cycle===2&&fullStats2){ render(fullStats2.matrix,fullStats2.mStats,fullStats2.total,cfg2Cache); updateReportTitle('2차'); }
+  else return;
+  document.getElementById('rh-toggle-1').classList.toggle('active',cycle===1);
+  document.getElementById('rh-toggle-2').classList.toggle('active',cycle===2);
+}
+// 1차/2차가 둘 다 저장/미리보기 되어있을 때만 토글 노출, 기본은 항상 최신(2차) 선택
+function updateReportToggle(){
+  const toggle=document.getElementById('rh-toggle');
+  if(fullStats1&&fullStats2){
+    toggle.style.display='flex';
+    document.getElementById('rh-toggle-1').classList.remove('active');
+    document.getElementById('rh-toggle-2').classList.add('active');
+  }else{
+    toggle.style.display='none';
+  }
 }
 
 function render(matrix,mStats,total,cfg){
@@ -1044,20 +1104,23 @@ function processFile(type,file){
       if(type===1){
         state.first={fileName:file.name,date:dateStr,data,cfg,saved:false,file};
         document.getElementById('uc1').className='ucard preview-1';
+        document.getElementById('uc1-badge').textContent='◐';
         document.getElementById('uc1-tag').innerHTML='◐ 1차 미리보기 (미저장)';
         document.getElementById('uc1-name').textContent=file.name;
+        document.getElementById('uc1-name').title=file.name;
         document.getElementById('uc1-date').textContent=dateStr;
         document.getElementById('uc2-name').textContent='2차 파일 업로드';
-        stats1Cache=process(data,cfg);
+        stats1Cache=process(data,cfg,1);
         updateReportTitle('1차 (미저장 미리보기)');
-        document.getElementById('change-section').style.display='none';
       }else{
         state.second={fileName:file.name,date:dateStr,data,cfg,saved:false,file};
         document.getElementById('uc2').className='ucard preview-2';
+        document.getElementById('uc2-badge').textContent='◐';
         document.getElementById('uc2-tag').innerHTML='◐ 2차 미리보기 (미저장)';
         document.getElementById('uc2-name').textContent=file.name;
+        document.getElementById('uc2-name').title=file.name;
         document.getElementById('uc2-date').textContent=dateStr;
-        const stats2=process(data,cfg);
+        const stats2=process(data,cfg,2);
         updateReportTitle('2차 (미저장 미리보기)');
         changeData=computeChanges();
         const mgrDiff=computeMgrDiffFromStats(stats1Cache,stats2);
@@ -1084,38 +1147,42 @@ function clearPreview(type,e){
   if(type===1){
     if(!state.first||state.first.saved)return; // 저장된 데이터는 이 버튼으로 안 지워짐
     if(!confirm('1차 미리보기 파일을 뺄까요?\n(저장 전 상태라 화면에서만 사라지고, 저장된 데이터는 없으니 안심하세요)'))return;
-    state.first=null;stats1Cache=null;
-    document.getElementById('uc1').className='ucard';
+    state.first=null;stats1Cache=null;fullStats1=null;
+    document.getElementById('uc1').className='ucard cat-green';
+    document.getElementById('uc1-badge').textContent='📌';
     document.getElementById('uc1-tag').textContent='1차 · 월초 업로드';
     document.getElementById('uc1-name').textContent='파일 클릭 또는 드래그';
+    document.getElementById('uc1-name').title='';
     document.getElementById('uc1-date').textContent='수주 데이터 (.xlsx)';
     if(state.second&&!state.second.saved){
-      state.second=null;
-      document.getElementById('uc2').className='ucard';
+      state.second=null;fullStats2=null;
+      document.getElementById('uc2').className='ucard cat-blue';
+      document.getElementById('uc2-badge').textContent='🔄';
       document.getElementById('uc2-tag').textContent='2차 · 월말 업로드';
       document.getElementById('uc2-date').textContent='금액·발주단가 변동 자동 확인';
     }
     document.getElementById('uc2-name').textContent=state.second?state.second.fileName:'1차 업로드 후 가능';
     document.getElementById('report-wrap').style.display='none';
     document.getElementById('empty-state').style.display='flex';
-    document.getElementById('change-section').style.display='none';
   }else{
     if(!state.second||state.second.saved)return;
     if(!confirm('2차 미리보기 파일을 뺄까요?\n(저장 전 상태라 화면에서만 사라지고, 저장된 데이터는 없으니 안심하세요)'))return;
-    state.second=null;
-    document.getElementById('uc2').className='ucard';
+    state.second=null;fullStats2=null;
+    document.getElementById('uc2').className='ucard cat-blue';
+    document.getElementById('uc2-badge').textContent='🔄';
     document.getElementById('uc2-tag').textContent='2차 · 월말 업로드';
     document.getElementById('uc2-name').textContent='1차 업로드 후 가능';
+    document.getElementById('uc2-name').title='';
     document.getElementById('uc2-date').textContent='금액·발주단가 변동 자동 확인';
-    document.getElementById('change-section').style.display='none';
     currentReportType=null;
     document.getElementById('change-report').style.display='none';
     if(state.first){
       const cfg=state.first.cfg||buildLiveConfig();
-      stats1Cache=process(state.first.data,cfg);
+      stats1Cache=process(state.first.data,cfg,1);
       updateReportTitle('1차');
     }
   }
+  updateReportToggle();
   updateSaveButtons();
 }
 
@@ -1126,7 +1193,6 @@ function updateReportTitle(cycle){
 }
 
 function renderChangeCards(mgrDiff){
-  document.getElementById('change-section').style.display='block';
   const evCount=changeData.changeEvents.length+changeData.unmatched.length;
   const costCount=changeData.costChange.length;
   document.getElementById('amt-count').textContent=evCount;
@@ -1649,11 +1715,13 @@ async function restoreMonth(){
     state.first=uploads.first;
     const cfg1=uploads.first.cfg||buildLiveConfig();
     document.getElementById('uc1').className='ucard done-1';
+    document.getElementById('uc1-badge').textContent='✓';
     document.getElementById('uc1-tag').innerHTML='✓ 1차 완료 (저장됨)';
     document.getElementById('uc1-name').textContent=uploads.first.fileName||'저장된 파일';
+    document.getElementById('uc1-name').title=uploads.first.fileName||'';
     document.getElementById('uc1-date').textContent=uploads.first.date||'';
     document.getElementById('uc2-name').textContent='2차 파일 업로드';
-    stats1Cache=process(uploads.first.data,cfg1);
+    stats1Cache=process(uploads.first.data,cfg1,1);
     updateReportTitle('1차');
     updateIsland('first');
   }
@@ -1662,10 +1730,12 @@ async function restoreMonth(){
     state.second=uploads.second;
     const cfg2=uploads.second.cfg||(uploads.first&&uploads.first.cfg)||buildLiveConfig();
     document.getElementById('uc2').className='ucard done-2';
+    document.getElementById('uc2-badge').textContent='✓';
     document.getElementById('uc2-tag').innerHTML='✓ 2차 완료 (저장됨)';
     document.getElementById('uc2-name').textContent=uploads.second.fileName||'저장된 파일';
+    document.getElementById('uc2-name').title=uploads.second.fileName||'';
     document.getElementById('uc2-date').textContent=uploads.second.date||'';
-    const stats2=process(uploads.second.data,cfg2);
+    const stats2=process(uploads.second.data,cfg2,2);
     updateReportTitle('2차');
     if(state.first){
       changeData=computeChanges();
@@ -1696,22 +1766,34 @@ function updateDial(){
 // "새로 생성" 버튼과 월 변경(dial) 시 공통으로 사용됨.
 function resetAll(){
   state={first:null,second:null};stats1Cache=null;
+  fullStats1=null;fullStats2=null;cfg1Cache=null;cfg2Cache=null;
+  document.getElementById('rh-toggle').style.display='none';
   changeData={changeEvents:[],unmatched:[],costChange:[]};
-  ['uc1','uc2'].forEach(id=>document.getElementById(id).className='ucard');
+  document.getElementById('uc1').className='ucard cat-green';
+  document.getElementById('uc2').className='ucard cat-blue';
+  document.getElementById('uc1-badge').textContent='📌';
   document.getElementById('uc1-tag').textContent='1차 · 월초 업로드';
   document.getElementById('uc1-name').textContent='파일 클릭 또는 드래그';
+  document.getElementById('uc1-name').title='';
   document.getElementById('uc1-date').textContent='수주 데이터 (.xlsx)';
+  document.getElementById('uc2-badge').textContent='🔄';
   document.getElementById('uc2-tag').textContent='2차 · 월말 업로드';
   document.getElementById('uc2-name').textContent='1차 업로드 후 가능';
+  document.getElementById('uc2-name').title='';
   document.getElementById('uc2-date').textContent='금액·발주단가 변동 자동 확인';
   document.getElementById('empty-state').style.display='flex';
   document.getElementById('report-wrap').style.display='none';
-  document.getElementById('change-section').style.display='none';
   currentReportType=null;
   document.getElementById('change-report').style.display='none';
   document.getElementById('chcard-amt').classList.remove('active');
   document.getElementById('chcard-cost').classList.remove('active');
   document.getElementById('chcard-manual').classList.remove('active');
+  document.getElementById('amt-count').textContent='0';
+  document.getElementById('cost-count').textContent='0';
+  document.getElementById('amt-sub').textContent='비교 데이터 없음';
+  document.getElementById('amt-sub').className='chcard-sub empty';
+  document.getElementById('cost-sub').textContent='비교 데이터 없음';
+  document.getElementById('cost-sub').className='chcard-sub empty';
   const[y,m]=currentMonth.split('-');
   document.getElementById('island').className='island compact';
   document.getElementById('island-inner').innerHTML=`<div class="i-dot gray"></div><span class="i-month">${parseInt(m)}월 ${y}</span><span class="i-status">대기 중</span>`;
@@ -1994,7 +2076,7 @@ async function doSave(){
   }
 }
 
-(async()=>{initMonthSelect();await loadManagers();await loadBrandSettings();await loadManagerTransfers();await restoreMonth();})();
+(async()=>{initMonthSelect();await loadManagers();await loadBrandSettings();await loadManagerTransfers();await restoreMonth();refreshManualCount();})();
 </script>
 </body>
 </html>
