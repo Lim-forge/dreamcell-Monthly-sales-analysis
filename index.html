@@ -773,11 +773,23 @@ function mappingRuleMatches(rule,ctx){
   if(rule.field2&&!mappingRuleCondMatch(rule.field2,rule.match_type2,rule.value2,ctx))return false;
   return true;
 }
-// bRawRaw/clientRaw로 표준 브랜드를 판정. 규칙 우선순위대로 검사해서 첫 매칭 규칙의 target_brand를 반환.
-// (예전엔 규칙이 없을 때 "브랜드명 완전일치" 폴백이 코드에 숨어있었는데, 전부 명시적 규칙(seed의 equals_ci)으로 옮겨서 이 함수는 이제 규칙만 봄)
+// bRawRaw/clientRaw로 표준 브랜드를 판정. mappingRules가 있으면(신규 저장분·현재 설정) 규칙만 보고 판정.
+// mappingRules가 아예 없으면(브랜드매핑규칙 기능 도입 이전에 저장된 구버전 스냅샷) 그 당시 실제 동작하던 원본 하드코딩 로직을 그대로 재현해서 과거 저장분이 깨지지 않게 함.
+function resolveBrandLegacy(bRawRaw,clientRaw,BRANDS){
+  let brand='';
+  if(bRawRaw==='Merck Group')brand='Merck';
+  else if(bRawRaw==='Excell bio')brand='Excell bio';
+  else if(bRawRaw==='Biotix')brand='Neptune';
+  else if(['stemgent','koken','reinnervate','reprocell'].some(k=>bRawRaw.toLowerCase().includes(k)))brand='reprocell (Stemgent,\nKoken, Reinnervate 포함)';
+  else if(bRawRaw.toLowerCase().includes('corning')&&['재고사용','포천창고','corning'].some(x=>clientRaw.toLowerCase().includes(x)))brand='CORNING';
+  else if(bRawRaw.toLowerCase().includes('beckman')&&['드림셀인스','재고사용'].some(x=>clientRaw.toLowerCase().includes(x)))brand='Beckman coulter';
+  else{for(let t of BRANDS){if(t.brand_name==='Merck')continue;if(t.brand_name.trim().toLowerCase()===bRawRaw.toLowerCase()){brand=t.brand_name;break;}}}
+  return brand;
+}
 function resolveBrand(bRawRaw,clientRaw,BRANDS,mappingRules){
+  if(mappingRules===undefined)return resolveBrandLegacy(bRawRaw,clientRaw,BRANDS);
   const ctx={brand:bRawRaw,client:clientRaw};
-  const rules=(mappingRules||[]).slice().sort((a,b)=>(a.priority||0)-(b.priority||0));
+  const rules=mappingRules.slice().sort((a,b)=>(a.priority||0)-(b.priority||0));
   for(const r of rules){ if(mappingRuleMatches(r,ctx))return r.target_brand; }
   return '';
 }
@@ -838,7 +850,7 @@ function fmtWon(v){return Math.round(v).toLocaleString();}
 
 function computeStats(data,cfg){
   cfg=cfg||buildLiveConfig();
-  const MGRS=cfg.managers,MMAP=cfg.managerMap,BRANDS=cfg.brands||[],TRANSFERS=cfg.transfers||[],MRULES=cfg.mappingRules||[];
+  const MGRS=cfg.managers,MMAP=cfg.managerMap,BRANDS=cfg.brands||[],TRANSFERS=cfg.transfers||[],MRULES=cfg.mappingRules;
   const transferByRaw={}; TRANSFERS.forEach(t=>{transferByRaw[t.from_raw_name]=t;});
 
   let matrix={};let mStats={};
