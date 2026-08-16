@@ -191,7 +191,8 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
 
 .mgr-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:none;align-items:center;justify-content:center;}
 .mgr-modal-bg.on{display:flex;}
-.mgr-modal{background:#fff;border-radius:20px;width:500px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;}
+.mgr-modal{background:#fff;border-radius:20px;width:500px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;transition:width .15s;}
+.mgr-modal.wide{width:860px;max-width:92vw;}
 .mm-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:0.5px solid #E5E5EA;}
 .mm-title{font-size:15px;font-weight:700;}
 .mm-tabs{display:flex;gap:6px;padding:10px 22px 0;border-bottom:0.5px solid #E5E5EA;}
@@ -210,6 +211,9 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
 .mm-add-lbl{font-size:10px;font-weight:700;color:#0A6FD8;}
 .mm-add-inp{padding:8px 10px;border:1px solid #D1E4FA;border-radius:8px;font-size:12px;}
 .mm-add-btn{padding:8px 16px;background:#0A84FF;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;}
+.mr-brand-card{display:flex;flex-direction:column;align-items:stretch;gap:8px;margin-bottom:8px;}
+.mr-chip{display:inline-flex;align-items:center;gap:4px;background:#EEF6FF;border:1px solid #D1E4FA;border-radius:16px;padding:3px 6px 3px 10px;font-size:12px;margin:3px 6px 3px 0;}
+.mr-chip button{border:none;background:transparent;color:#8E8E93;cursor:pointer;font-size:13px;line-height:1;padding:0 2px;}
 .mm-footer{padding:14px 22px;border-top:0.5px solid #E5E5EA;display:flex;justify-content:flex-end;gap:8px;}
 .mm-cancel{padding:8px 18px;border:1px solid #E5E5EA;border-radius:10px;background:#fff;font-size:13px;font-weight:600;cursor:pointer;}
 .mm-save{padding:8px 20px;background:#0A84FF;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;}
@@ -485,19 +489,9 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
         <div id="brand-list-special"></div>
       </div>
       <div id="mm-panel-mapping" style="display:none;">
-        <div style="font-size:11px;color:#8E8E93;margin-bottom:10px;line-height:1.5;">"3.제조사별 상세" 표에서 제조업체 원본값을 어느 브랜드로 모을지 정하는 규칙이에요. 조건이 여러 개 겹치면 우선순위(숫자 작은 것)가 먼저 적용돼요. 총매출/담당자매출에는 영향 없어요.</div>
+        <div style="font-size:11px;color:#8E8E93;margin-bottom:10px;line-height:1.5;">"3.제조사별 상세" 표에서 제조업체 원본값을 어느 브랜드로 모을지 정해요. 총매출/담당자매출에는 영향 없어요.<br>브랜드 옆 입력칸에 원본값 넣고 +를 누르면 합쳐지고, 이미 합쳐진 값의 ×를 누르면 그 브랜드표에서만 빠져요(총매출엔 그대로 남아요).</div>
         <div id="mr-unclassified-hint" style="display:none;background:#FFF4E0;border:1px solid #FFD98E;border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:11px;color:#7A4E00;"></div>
-        <div class="mm-add" style="flex-wrap:wrap;margin-bottom:10px;">
-          <div class="mm-add-col"><span class="mm-add-lbl">대상 브랜드</span><select class="mm-add-inp" id="mr-target"></select></div>
-          <div class="mm-add-col"><span class="mm-add-lbl">필드1</span><select class="mm-add-inp" id="mr-field1"><option value="brand">제조업체</option><option value="client">거래처</option></select></div>
-          <div class="mm-add-col"><span class="mm-add-lbl">방식1</span><select class="mm-add-inp" id="mr-mt1"><option value="contains">포함</option><option value="equals">정확히일치</option></select></div>
-          <div class="mm-add-col"><span class="mm-add-lbl">값1</span><input class="mm-add-inp" id="mr-val1" placeholder="예: corning"></div>
-          <div class="mm-add-col"><span class="mm-add-lbl">필드2(선택)</span><select class="mm-add-inp" id="mr-field2"><option value="">없음</option><option value="brand">제조업체</option><option value="client">거래처</option></select></div>
-          <div class="mm-add-col"><span class="mm-add-lbl">방식2</span><select class="mm-add-inp" id="mr-mt2"><option value="contains">포함</option><option value="equals">정확히일치</option></select></div>
-          <div class="mm-add-col"><span class="mm-add-lbl">값2</span><input class="mm-add-inp" id="mr-val2" placeholder="비워두면 조건없음"></div>
-          <button class="mm-add-btn" onclick="addMappingRule()">추가</button>
-        </div>
-        <div id="mr-list" class="mm-list"></div>
+        <div id="mr-cards"></div>
       </div>
       <div id="mm-panel-admin" style="display:none;">
         <div style="background:#FFEBE9;border:1px solid #FFC7C2;border-radius:10px;padding:14px;margin-bottom:10px;">
@@ -714,10 +708,12 @@ async function loadManagerTransfers(){
 }
 
 // ===== 브랜드 매핑 규칙 (제조업체 원본텍스트 → 표준 브랜드) =====
-// field: 'brand'(제조업체) | 'client'(거래처/발주처), match_type: 'contains'(대소문자무시 부분일치) | 'equals'(대소문자구분 완전일치)
+// field: 'brand'(제조업체) | 'client'(거래처/발주처), match_type: 'contains'(대소문자무시 부분일치) | 'equals'(대소문자구분 완전일치) | 'equals_ci'(대소문자무시 완전일치)
 // field2/match_type2/value2가 있으면 field1 AND field2 조건. priority 낮을수록 먼저 검사. is_system=true는 삭제 불가(구조상 항상 필요한 규칙).
+// 수주자(제외리스트)만 통과하면 거래처와 무관하게 매출로 잡는다는 업무규칙 확인 후, corning/beckman의 거래처 조건은 제거함(2026-08).
+// 예전엔 "브랜드명과 원본텍스트가 완전히 똑같으면 자동매칭"이라는 코드 폴백이 화면에 안 보이게 숨어있었는데, 전부 명시적 규칙으로 꺼내서 노출·편집 가능하게 함.
 function DEFAULT_MAPPING_RULES_SEED(){
-  return [
+  const explicit=[
     {target_brand:'Merck',field1:'brand',match_type1:'equals',value1:'Merck Group',priority:0,active:true,is_system:false},
     {target_brand:'Excell bio',field1:'brand',match_type1:'equals',value1:'Excell bio',priority:1,active:true,is_system:false},
     {target_brand:'Neptune',field1:'brand',match_type1:'equals',value1:'Biotix',priority:2,active:true,is_system:false},
@@ -725,12 +721,27 @@ function DEFAULT_MAPPING_RULES_SEED(){
     {target_brand:'reprocell (Stemgent,\nKoken, Reinnervate 포함)',field1:'brand',match_type1:'contains',value1:'koken',priority:4,active:true,is_system:false},
     {target_brand:'reprocell (Stemgent,\nKoken, Reinnervate 포함)',field1:'brand',match_type1:'contains',value1:'reinnervate',priority:5,active:true,is_system:false},
     {target_brand:'reprocell (Stemgent,\nKoken, Reinnervate 포함)',field1:'brand',match_type1:'contains',value1:'reprocell',priority:6,active:true,is_system:false},
-    {target_brand:'CORNING',field1:'brand',match_type1:'contains',value1:'corning',field2:'client',match_type2:'contains',value2:'재고사용',priority:7,active:true,is_system:false},
-    {target_brand:'CORNING',field1:'brand',match_type1:'contains',value1:'corning',field2:'client',match_type2:'contains',value2:'포천창고',priority:8,active:true,is_system:false},
-    {target_brand:'CORNING',field1:'brand',match_type1:'contains',value1:'corning',field2:'client',match_type2:'contains',value2:'corning',priority:9,active:true,is_system:false},
-    {target_brand:'Beckman coulter',field1:'brand',match_type1:'contains',value1:'beckman',field2:'client',match_type2:'contains',value2:'드림셀인스',priority:10,active:true,is_system:false},
-    {target_brand:'Beckman coulter',field1:'brand',match_type1:'contains',value1:'beckman',field2:'client',match_type2:'contains',value2:'재고사용',priority:11,active:true,is_system:false},
+    {target_brand:'CORNING',field1:'brand',match_type1:'contains',value1:'corning',priority:7,active:true,is_system:false},
+    {target_brand:'Beckman coulter',field1:'brand',match_type1:'contains',value1:'beckman',priority:8,active:true,is_system:false},
   ];
+  // 나머지 브랜드는 "원본텍스트가 브랜드명과 완전히 똑같으면(대소문자무시) 매칭" 규칙을 자동 생성.
+  // 단, 이미 위 explicit 규칙 중 하나가 그 브랜드명 자체를 이미 커버하고 있으면 중복 생성 안 함.
+  // Merck는 원래 코드부터 "Merck Group"만 잡고 "Merck" 단독 텍스트는 의도적으로 제외되어 있었음(자세한 배경은 알 수 없음, 아래 대화기록 참고) → 자동생성 대상에서 제외.
+  const isCovered=(brandName)=>explicit.some(r=>{
+    if(r.field1!=='brand'||r.field2)return false;
+    const bn=brandName.toLowerCase();
+    if(r.match_type1==='equals')return r.value1===brandName;
+    if(r.match_type1==='equals_ci')return r.value1.toLowerCase()===bn;
+    return bn.includes(r.value1.toLowerCase());
+  });
+  let p=explicit.length;
+  const autoRules=[];
+  DEFAULT_BRAND_SEED().forEach(b=>{
+    if(b.brand_name==='Merck')return;
+    if(isCovered(b.brand_name))return;
+    autoRules.push({target_brand:b.brand_name,field1:'brand',match_type1:'equals_ci',value1:b.brand_name,priority:p++,active:true,is_system:false});
+  });
+  return explicit.concat(autoRules);
 }
 let BRAND_MAPPING_RULES=[]; let tempMappingRules=[];
 async function loadMappingRules(){
@@ -753,6 +764,7 @@ function mappingRuleCondMatch(field,matchType,value,ctx){
   if(!field||value===undefined||value===null||value==='')return true;
   const actual=mappingRuleFieldValue(field,ctx);
   if(matchType==='equals')return actual===value;
+  if(matchType==='equals_ci')return actual.toLowerCase()===String(value).toLowerCase();
   return actual.toLowerCase().includes(String(value).toLowerCase());
 }
 function mappingRuleMatches(rule,ctx){
@@ -761,13 +773,12 @@ function mappingRuleMatches(rule,ctx){
   if(rule.field2&&!mappingRuleCondMatch(rule.field2,rule.match_type2,rule.value2,ctx))return false;
   return true;
 }
-// bRawRaw/clientRaw로 표준 브랜드를 판정. 규칙 우선순위대로 검사 후, 못 찾으면 브랜드명 완전일치(대소문자무시) 폴백.
-// 주의: 폴백에서 'Merck'는 원래 코드부터 의도적으로 제외됨 → 원본텍스트가 정확히 "Merck"인 경우 규칙이 없으면 미분류 처리됨("Merck Group"만 규칙으로 잡힘)
+// bRawRaw/clientRaw로 표준 브랜드를 판정. 규칙 우선순위대로 검사해서 첫 매칭 규칙의 target_brand를 반환.
+// (예전엔 규칙이 없을 때 "브랜드명 완전일치" 폴백이 코드에 숨어있었는데, 전부 명시적 규칙(seed의 equals_ci)으로 옮겨서 이 함수는 이제 규칙만 봄)
 function resolveBrand(bRawRaw,clientRaw,BRANDS,mappingRules){
   const ctx={brand:bRawRaw,client:clientRaw};
   const rules=(mappingRules||[]).slice().sort((a,b)=>(a.priority||0)-(b.priority||0));
   for(const r of rules){ if(mappingRuleMatches(r,ctx))return r.target_brand; }
-  for(let t of BRANDS){ if(t.brand_name==='Merck')continue; if(t.brand_name.trim().toLowerCase()===bRawRaw.toLowerCase())return t.brand_name; }
   return '';
 }
 
@@ -1038,7 +1049,7 @@ function exportToExcel(){
   XLSX.writeFile(wb,`DREAMCELL_매출분석_${currentMonth}.xlsx`);
 }
 
-// ===== 브랜드 매핑 규칙 (⚙️ 설정 → 브랜드매핑 탭) =====
+// ===== 브랜드 매핑 규칙 (⚙️ 설정 → 브랜드매핑 탭, +/- 카드 방식) =====
 function renderUnclassifiedBanner(){
   const el=document.getElementById('unclassified-banner');
   if(!el)return;
@@ -1049,77 +1060,63 @@ function renderUnclassifiedBanner(){
   el.innerHTML=`⚠ 브랜드 미분류 원본값 ${keys.length}개 (합계 ${fmtWon(totalAmt)}원) · 총매출/담당자매출엔 이미 반영되어 있고, 브랜드별표에만 안 잡혀요 — 클릭해서 ⚙️ 설정에서 규칙 추가`;
 }
 function openUnclassifiedList(){ openMgrModal(); switchSettingsTab('mapping'); }
-function openBrandDrill(brandName){ openMgrModal(); switchSettingsTab('mapping'); document.getElementById('mr-target').value=brandName; }
+function openBrandDrill(brandName){ openMgrModal(); switchSettingsTab('mapping'); }
+function brandSelectOptions(){return '<option value="">브랜드</option>'+BRAND_CFG.map(b=>`<option value="${b.brand_name}">${b.brand_name}</option>`).join('');}
 function renderUnclassifiedHint(){
   const el=document.getElementById('mr-unclassified-hint');
   const keys=Object.keys(currentUnclassified||{});
   if(!keys.length){el.style.display='none';return;}
   el.style.display='block';
   const sorted=keys.sort((a,b)=>currentUnclassified[b].amount-currentUnclassified[a].amount).slice(0,20);
-  el.innerHTML='이번 달 업로드 기준 미분류 원본값 '+keys.length+'개:<br>'+sorted.map(k=>{
+  window._ucKeysCache=sorted;
+  el.innerHTML='이번 달 업로드 기준 미분류 원본값 '+keys.length+'개:<br>'+sorted.map((k,i)=>{
     const v=currentUnclassified[k];
-    return `<span style="display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #FFD98E;border-radius:6px;padding:2px 6px;margin:3px 4px 0 0;">${k} (${fmtWon(v.amount)}원)<button style="border:none;background:#0A6FD8;color:#fff;border-radius:4px;font-size:10px;padding:1px 6px;cursor:pointer;" onclick="quickFillMappingValue('${k.replace(/'/g,"\\'")}')">채우기</button></span>`;
+    return `<span style="display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #FFD98E;border-radius:6px;padding:2px 6px;margin:3px 4px 0 0;">${k} (${fmtWon(v.amount)}원)
+      <select id="uc-hint-sel-${i}" style="font-size:11px;border:1px solid #FFD98E;border-radius:4px;">${brandSelectOptions()}</select>
+      <button style="border:none;background:#0A6FD8;color:#fff;border-radius:4px;font-size:10px;padding:1px 6px;cursor:pointer;" onclick="assignFromHint(${i})">추가</button>
+    </span>`;
   }).join('');
 }
-function quickFillMappingValue(v){
-  document.getElementById('mr-field1').value='brand';
-  document.getElementById('mr-mt1').value='equals';
-  document.getElementById('mr-val1').value=v;
-  document.getElementById('mr-val1').focus();
+function assignFromHint(i){
+  const rawValue=window._ucKeysCache[i];
+  const target=document.getElementById('uc-hint-sel-'+i).value;
+  if(!target){showToast('브랜드를 선택해주세요');return;}
+  const maxP=tempMappingRules.length?Math.max(...tempMappingRules.map(r=>r.priority||0)):-1;
+  tempMappingRules.push({target_brand:target,field1:'brand',match_type1:'equals',value1:rawValue,priority:maxP+1,active:true,is_system:false});
+  renderMappingCards();
+  showToast(`'${rawValue}' → ${target} 추가됨. 저장을 눌러야 반영돼요`,3000);
 }
-function ruleSummary(r){
-  const f1label=r.field1==='client'?'거래처':'제조업체';
-  const mt1label=r.match_type1==='equals'?'=':'포함';
-  let s=`${f1label} ${mt1label} "${r.value1}"`;
-  if(r.field2){
-    const f2label=r.field2==='client'?'거래처':'제조업체';
-    const mt2label=r.match_type2==='equals'?'=':'포함';
-    s+=` AND ${f2label} ${mt2label} "${r.value2}"`;
-  }
-  return s;
-}
-function renderMappingRuleList(){
-  const el=document.getElementById('mr-list');
-  const sorted=tempMappingRules.slice().sort((a,b)=>(a.priority||0)-(b.priority||0));
-  if(!sorted.length){el.innerHTML='<div style="font-size:12px;color:#8E8E93;padding:10px 2px;">등록된 규칙이 없습니다</div>';return;}
-  el.innerHTML=sorted.map(r=>{
-    const idx=tempMappingRules.indexOf(r);
-    return `<div class="mm-item">
-      <span class="mm-order">${r.priority}</span>
-      <span class="mm-raw" style="flex:0 0 auto;min-width:110px;font-weight:800;">${r.target_brand||'(미분류로 고정)'}</span>
-      <span class="mm-disp" style="flex:1;font-size:12px;">${ruleSummary(r)}</span>
-      <button class="mm-del" style="background:#EEF6FF;color:#0A6FD8;" onclick="moveMappingRule(${idx},-1)">↑</button>
-      <button class="mm-del" style="background:#EEF6FF;color:#0A6FD8;" onclick="moveMappingRule(${idx},1)">↓</button>
-      ${r.is_system?'':`<button class="mm-del" onclick="removeMappingRule(${idx})">삭제</button>`}
+function renderMappingCards(){
+  const el=document.getElementById('mr-cards');
+  el.innerHTML=BRAND_CFG.map((b,bi)=>{
+    const rules=tempMappingRules.filter(r=>r.target_brand===b.brand_name);
+    const chips=rules.map(r=>{
+      const idx=tempMappingRules.indexOf(r);
+      const label=r.value1+(r.field2?` (+${r.field2==='client'?'거래처':'제조업체'}:${r.value2})`:'');
+      return `<span class="mr-chip">${label}<button onclick="removeMappingRuleByIdx(${idx})" title="이 브랜드표에서만 제외">×</button></span>`;
+    }).join('');
+    return `<div class="mm-item mr-brand-card">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-weight:800;font-size:13px;">${b.brand_name}</span>
+        <span style="flex:1;"></span>
+        <input class="mm-add-inp" id="mr-add-${bi}" placeholder="원본값 추가" style="width:140px;">
+        <button class="mm-add-btn" style="padding:6px 10px;" onclick="addChip(${bi})">+</button>
+      </div>
+      <div>${chips||'<span style="font-size:11px;color:#C7C7CC;">합쳐진 원본값 없음</span>'}</div>
     </div>`;
   }).join('');
 }
-function moveMappingRule(idx,dir){
-  const target=tempMappingRules[idx];
-  const sorted=tempMappingRules.slice().sort((a,b)=>(a.priority||0)-(b.priority||0));
-  const pos=sorted.indexOf(target);const swapPos=pos+dir;
-  if(swapPos<0||swapPos>=sorted.length)return;
-  const other=sorted[swapPos];
-  const tmp=target.priority||0;target.priority=other.priority||0;other.priority=tmp;
-  renderMappingRuleList();
-}
-function removeMappingRule(idx){tempMappingRules.splice(idx,1);renderMappingRuleList();}
-function addMappingRule(){
-  const target=document.getElementById('mr-target').value;
-  const field1=document.getElementById('mr-field1').value;
-  const mt1=document.getElementById('mr-mt1').value;
-  const val1=document.getElementById('mr-val1').value.trim();
-  const field2=document.getElementById('mr-field2').value;
-  const mt2=document.getElementById('mr-mt2').value;
-  const val2=document.getElementById('mr-val2').value.trim();
-  if(!target||!val1){showToast('대상 브랜드와 값1은 필수예요');return;}
+function addChip(bi){
+  const b=BRAND_CFG[bi];
+  const inp=document.getElementById('mr-add-'+bi);
+  const val=inp.value.trim();
+  if(!val){showToast('원본값을 입력해주세요');return;}
   const maxP=tempMappingRules.length?Math.max(...tempMappingRules.map(r=>r.priority||0)):-1;
-  const rule={target_brand:target,field1,match_type1:mt1,value1:val1,priority:maxP+1,active:true,is_system:false};
-  if(field2&&val2){rule.field2=field2;rule.match_type2=mt2;rule.value2=val2;}
-  tempMappingRules.push(rule);
-  document.getElementById('mr-val1').value='';document.getElementById('mr-val2').value='';
-  renderMappingRuleList();
+  tempMappingRules.push({target_brand:b.brand_name,field1:'brand',match_type1:'contains',value1:val,priority:maxP+1,active:true,is_system:false});
+  inp.value='';
+  renderMappingCards();
 }
+function removeMappingRuleByIdx(idx){tempMappingRules.splice(idx,1);renderMappingCards();}
 async function saveMappingRules(){
   try{
     showToast('저장 중...',3000);
@@ -1994,10 +1991,9 @@ function openMgrModal(){
   tempBrands=JSON.parse(JSON.stringify(BRAND_CFG));
   tempTransfers=JSON.parse(JSON.stringify(MANAGER_TRANSFERS));
   tempMappingRules=JSON.parse(JSON.stringify(BRAND_MAPPING_RULES));
-  renderMgrList();renderBrandLists();renderMappingRuleList();
+  renderMgrList();renderBrandLists();renderMappingCards();
   const tfTo=document.getElementById('tf-to');
   tfTo.innerHTML=MANAGERS.map(m=>`<option value="${m}">${m}</option>`).join('');
-  document.getElementById('mr-target').innerHTML=BRAND_CFG.map(b=>`<option value="${b.brand_name}">${b.brand_name}</option>`).join('');
   renderTransferList();
   renderUnclassifiedHint();
   switchSettingsTab('mgr');
@@ -2010,6 +2006,7 @@ function switchSettingsTab(tab){
     document.getElementById('mm-tab-'+t).classList.toggle('on',t===tab);
     document.getElementById('mm-panel-'+t).style.display=(t===tab)?'block':'none';
   });
+  document.querySelector('#mgr-modal .mgr-modal').classList.toggle('wide',tab==='mapping');
   document.getElementById('mm-footer').style.display=(tab==='admin')?'none':'flex';
   if(tab==='admin'){
     const sel=document.getElementById('admin-del-month');
