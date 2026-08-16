@@ -191,8 +191,7 @@ table.report td:first-child,table.report th:first-child{width:105px;min-width:10
 
 .mgr-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:none;align-items:center;justify-content:center;}
 .mgr-modal-bg.on{display:flex;}
-.mgr-modal{background:#fff;border-radius:20px;width:500px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;transition:width .15s;}
-.mgr-modal.wide{width:860px;max-width:92vw;}
+.mgr-modal{background:#fff;border-radius:20px;width:1032px;max-width:96vw;max-height:96vh;display:flex;flex-direction:column;overflow:hidden;}
 .mm-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:0.5px solid #E5E5EA;}
 .mm-title{font-size:15px;font-weight:700;}
 .mm-tabs{display:flex;gap:6px;padding:10px 22px 0;border-bottom:0.5px solid #E5E5EA;}
@@ -1123,6 +1122,14 @@ function addChip(bi){
   const inp=document.getElementById('mr-add-'+bi);
   const val=inp.value.trim();
   if(!val){showToast('원본값을 입력해주세요');return;}
+  const dup=tempMappingRules.filter(r=>r.target_brand!==b.brand_name&&r.field1==='brand'&&!r.field2&&r.value1.toLowerCase()===val.toLowerCase());
+  if(dup.length){
+    const otherBrands=[...new Set(dup.map(r=>r.target_brand||'(미분류)'))].join(', ');
+    const moveIt=confirm(`'${val}'은(는) 이미 [${otherBrands}]에 등록되어 있어요.\n\n확인 → 거기서 빼고 여기(${b.brand_name})로 옮길게요\n취소 → 두 브랜드 모두에 유지할게요 (우선순위상 먼저 등록된 쪽이 적용돼요)`);
+    if(moveIt){
+      dup.forEach(r=>{const idx=tempMappingRules.indexOf(r);tempMappingRules.splice(idx,1);});
+    }
+  }
   const maxP=tempMappingRules.length?Math.max(...tempMappingRules.map(r=>r.priority||0)):-1;
   tempMappingRules.push({target_brand:b.brand_name,field1:'brand',match_type1:'contains',value1:val,priority:maxP+1,active:true,is_system:false});
   inp.value='';
@@ -1999,6 +2006,7 @@ function startFresh(){
 
 let activeSettingsTab='mgr';
 function openMgrModal(){
+  mgrEditingIdx=null;
   tempManagers=JSON.parse(JSON.stringify(ALL_MANAGER_ROWS));
   tempBrands=JSON.parse(JSON.stringify(BRAND_CFG));
   tempTransfers=JSON.parse(JSON.stringify(MANAGER_TRANSFERS));
@@ -2018,7 +2026,6 @@ function switchSettingsTab(tab){
     document.getElementById('mm-tab-'+t).classList.toggle('on',t===tab);
     document.getElementById('mm-panel-'+t).style.display=(t===tab)?'block':'none';
   });
-  document.querySelector('#mgr-modal .mgr-modal').classList.toggle('wide',tab==='mapping');
   document.getElementById('mm-footer').style.display=(tab==='admin')?'none':'flex';
   if(tab==='admin'){
     const sel=document.getElementById('admin-del-month');
@@ -2052,14 +2059,33 @@ async function adminDeleteMonth(){
 }
 
 // ----- 담당자 (삭제 대신 숨김/다시보이기 — ERP에 이름이 다시 찍혀도 매칭 유지) -----
+let mgrEditingIdx=null;
 function renderMgrList(){
-  document.getElementById('mm-list').innerHTML=tempManagers.map((m,i)=>`
-    <div class="mm-item" style="${m.visible===false?'opacity:.45;':''}">
+  document.getElementById('mm-list').innerHTML=tempManagers.map((m,i)=>{
+    if(i===mgrEditingIdx){
+      return `<div class="mm-item">
+        <span class="mm-order">${i+1}</span>
+        <span class="mm-raw">${m.raw_name}</span>
+        <input class="mm-add-inp" id="mm-edit-${i}" value="${m.display_name}" style="flex:1;">
+        <button class="mm-del" style="background:#0A84FF;color:#fff;" onclick="saveManagerEdit(${i})">저장</button>
+        <button class="mm-del" onclick="mgrEditingIdx=null;renderMgrList();">취소</button>
+      </div>`;
+    }
+    return `<div class="mm-item" style="${m.visible===false?'opacity:.45;':''}">
       <span class="mm-order">${i+1}</span>
       <span class="mm-raw">${m.raw_name}</span>
       <span class="mm-disp">${m.display_name}${m.visible===false?' <span style="font-size:10px;color:#8E8E93;">(숨김)</span>':''}</span>
+      <button class="mm-del" style="background:#EEF6FF;color:#0A6FD8;" onclick="mgrEditingIdx=${i};renderMgrList();">수정</button>
       <button class="mm-del" onclick="toggleManagerVisible(${i})">${m.visible===false?'다시보이기':'숨김'}</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
+}
+function saveManagerEdit(i){
+  const val=document.getElementById('mm-edit-'+i).value.trim();
+  if(!val){showToast('표시 이름을 입력해주세요');return;}
+  tempManagers[i].display_name=val;
+  mgrEditingIdx=null;
+  renderMgrList();
 }
 function toggleManagerVisible(i){tempManagers[i].visible=(tempManagers[i].visible===false)?true:false;renderMgrList();}
 function addManager(){
